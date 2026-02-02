@@ -1,50 +1,49 @@
 package com.petcare.common.elasticsearch.application;
 
-import com.petcare.common.elasticsearch.domain.ZoneDocument;
+import co.elastic.clients.elasticsearch.ElasticsearchClient;
+import co.elastic.clients.elasticsearch._types.GeoShapeRelation;
+import co.elastic.clients.elasticsearch._types.query_dsl.Query;
+import co.elastic.clients.elasticsearch.core.SearchRequest;
+import co.elastic.clients.elasticsearch.core.SearchResponse;
+import co.elastic.clients.elasticsearch.core.search.Hit;
+import co.elastic.clients.json.JsonData;
 import com.petcare.common.elasticsearch.domain.ZoneDocumentSearchResult;
 import com.petcare.common.elasticsearch.dto.GeoPointDto;
+import java.io.IOException;
+import java.io.StringReader;
 import java.util.List;
 import java.util.stream.Collectors;
 import lombok.AllArgsConstructor;
-import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
-import org.springframework.data.elasticsearch.core.SearchHit;
-import org.springframework.data.elasticsearch.core.query.StringQuery;
 import org.springframework.stereotype.Service;
 
 @Service
 @AllArgsConstructor
 public class ZoneDocumentSearchUseCase {
 
-  private final ElasticsearchOperations elasticsearchOperations;
+  private final ElasticsearchClient elasticsearchClient;
 
-  public List<ZoneDocumentSearchResult> execute(GeoPointDto point) {
-    String queryJson =
-        String.format(
-            """
-            {
-              "query": {
-                "geo_shape": {
-                  "area": {
-                    "shape": {
-                      "type": "point",
-                      "coordinates": [%f, %f]
-                    },
-                    "relation": "contains"
-                  }
-                }
-              }
-            }
-            """,
-            point.lon(), point.lat());
+  public List<ZoneDocumentSearchResult> execute(GeoPointDto point) throws IOException {
 
-    StringQuery searchQuery = new StringQuery(queryJson);
+    String geoJsonString =
+        String.format("{\"type\":\"Point\",\"coordinates\":[%f,%f]}", point.lon(), point.lat());
 
-    List<SearchHit<ZoneDocument>> searchHits =
-        elasticsearchOperations.search(searchQuery, ZoneDocument.class).getSearchHits();
+    Query geoShapeQuery =
+        Query.of(
+            q ->
+                q.geoShape(
+                    gs ->
+                        gs.field("polygon")
+                            .shape(
+                                shape ->
+                                    shape
+                                        .shape(JsonData.from(new StringReader(geoJsonString)))
+                                        .relation(GeoShapeRelation.Intersects))));
 
-    return searchHits.stream()
-        .map(SearchHit::getContent)
-        .map(zone -> new ZoneDocumentSearchResult(zone.getId(), zone.getName(), zone.getCode()))
-        .collect(Collectors.toList());
+    SearchRequest searchRequest =
+        SearchRequest.of(s -> s.index("zone").query(geoShapeQuery).size(100));
+
+    SearchResponse<ZoneDocumentSearchResult> response =
+        elasticsearchClient.search(searchRequest, ZoneDocumentSearchResult.class);
+    return response.hits().hits().stream().map(Hit::source).collect(Collectors.toList());
   }
 }
