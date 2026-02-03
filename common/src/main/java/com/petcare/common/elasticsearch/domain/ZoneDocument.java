@@ -16,15 +16,17 @@ import org.springframework.data.elasticsearch.core.geo.GeoJsonPolygon;
 @Document(indexName = "zone")
 public class ZoneDocument {
 
-  @Id private Long id;
+  @Id
+  @Field(type = FieldType.Keyword)
+  private Long id;
 
   @Field(type = FieldType.Text)
   private String name;
 
-  @Field(type = FieldType.Text)
+  @Field(type = FieldType.Keyword)
   private String code;
 
-  @Field(type = FieldType.Text)
+  @Field(type = FieldType.Keyword)
   private String status;
 
   @GeoShapeField private GeoJsonPolygon polygon;

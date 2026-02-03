@@ -27,20 +27,21 @@ public class ZoneDocumentSearchUseCase {
     String geoJsonString =
         String.format("{\"type\":\"Point\",\"coordinates\":[%f,%f]}", point.lon(), point.lat());
 
-    Query geoShapeQuery =
+    Query geoShapeFilter =
         Query.of(
             q ->
                 q.geoShape(
                     gs ->
                         gs.field("polygon")
                             .shape(
-                                shape ->
-                                    shape
-                                        .shape(JsonData.from(new StringReader(geoJsonString)))
+                                s ->
+                                    s.shape(JsonData.from(new StringReader(geoJsonString)))
                                         .relation(GeoShapeRelation.Intersects))));
 
-    SearchRequest searchRequest =
-        SearchRequest.of(s -> s.index("zone").query(geoShapeQuery).size(100));
+    Query statusFilter = Query.of(q -> q.term(t -> t.field("status").value("active")));
+    Query query = Query.of(q -> q.bool(b -> b.filter(geoShapeFilter).filter(statusFilter)));
+
+    SearchRequest searchRequest = SearchRequest.of(s -> s.index("zone").query(query).size(100));
 
     SearchResponse<ZoneDocumentSearchResult> response =
         elasticsearchClient.search(searchRequest, ZoneDocumentSearchResult.class);
