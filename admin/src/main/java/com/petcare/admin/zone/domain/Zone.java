@@ -13,16 +13,22 @@ import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToMany;
+import jakarta.persistence.Table;
 import jakarta.validation.constraints.Pattern;
 import java.util.List;
-import java.util.Set;
+import lombok.Getter;
+import lombok.Setter;
 
+@Getter
+@Setter
 @Entity
+@Table(name = "zone")
 public class Zone extends Auditable {
 
   @Id
@@ -49,5 +55,6 @@ public class Zone extends Auditable {
   @Enumerated(EnumType.STRING)
   private ZoneStatus status;
 
-  @OneToMany private Set<Merchant> merchants;
+  @OneToMany(fetch = FetchType.LAZY)
+  private List<Merchant> merchants;
 }

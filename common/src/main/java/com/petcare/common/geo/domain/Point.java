@@ -15,14 +15,14 @@ import lombok.Setter;
 @AllArgsConstructor
 public class Point {
 
-  @Column(name = "LATITUDE")
-  private Double latitude;
+  @Column(name = "lat")
+  private Double lat;
 
-  @Column(name = "LONGITUDE")
-  private Double longitude;
+  @Column(name = "lon")
+  private Double lon;
 
-  public static Point of(Double latitude, Double longitude) {
-    return new Point(latitude, longitude);
+  public static Point of(Double lat, Double lon) {
+    return new Point(lat, lon);
   }
 
   @Override
@@ -35,22 +35,20 @@ public class Point {
     }
 
     Point other = (Point) o;
-    boolean latitudeEquals =
-        !(other.getLatitude() == null || getLatitude() == null)
-            && Objects.equals(getLatitude(), other.getLatitude());
-    boolean longitudeEquals =
-        !(other.getLongitude() == null || getLongitude() == null)
-            && Objects.equals(getLongitude(), other.getLongitude());
-    return latitudeEquals && longitudeEquals;
+    boolean latEquals =
+        !(other.getLat() == null || getLat() == null) && Objects.equals(getLat(), other.getLat());
+    boolean lonEquals =
+        !(other.getLon() == null || getLon() == null) && Objects.equals(getLon(), other.getLon());
+    return latEquals && lonEquals;
   }
 
   @Override
   public int hashCode() {
-    return Objects.hashCode(String.valueOf(getLatitude()).concat(String.valueOf(getLongitude())));
+    return Objects.hashCode(String.valueOf(getLat()).concat(String.valueOf(getLon())));
   }
 
   @Override
   public String toString() {
-    return "(" + "lat=" + latitude + ", long=" + longitude + ')';
+    return "(" + "lat=" + lat + ", long=" + lon + ')';
   }
 }
