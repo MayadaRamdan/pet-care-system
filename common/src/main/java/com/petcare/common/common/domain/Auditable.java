@@ -3,7 +3,6 @@ package com.petcare.common.common.domain;
 import jakarta.persistence.Column;
 import jakarta.persistence.EntityListeners;
 import jakarta.persistence.MappedSuperclass;
-import jakarta.persistence.Version;
 import java.time.Instant;
 import lombok.Getter;
 import lombok.Setter;
@@ -20,10 +19,10 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 public abstract class Auditable {
 
   @Column(nullable = false)
-  protected boolean active;
+  public boolean active;
 
   @Column(nullable = false)
-  protected boolean deleted;
+  public boolean deleted;
 
   @CreatedDate
   @Column(updatable = false)
@@ -36,6 +35,4 @@ public abstract class Auditable {
   @LastModifiedBy private String updatedBy;
 
   private Instant deletedAt;
-
-  @Version private Long version;
 }

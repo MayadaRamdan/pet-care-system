@@ -1,0 +1,56 @@
+spring:
+  application:
+    name: customer
+  threads:
+    virtual:
+      enabled: true  #enable virtual threads
+
+  # Database
+  datasource:
+    url: jdbc:postgresql://localhost:5432/petcare
+    username: postgres
+    password: root
+    driver-class-name: org.postgresql.Driver
+    hikari:
+      maximum-pool-size: 20 #database pool configuration
+
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+        default_schema: catalog
+
+  # Redis
+  data:
+    redis:
+      host: localhost
+      port: 6379
+      password: # leave empty if no password
+      timeout: 60000
+
+  # OAuth2
+  security:
+    oauth2:
+      client:
+        registration:
+          google:
+            client-id: ${GOOGLE_CLIENT_ID}
+            client-secret: ${GOOGLE_CLIENT_SECRET}
+            scope:
+              - email
+              - profile
+
+# JWT Configuration
+jwt:
+  secret: 87ab465cbb15dae140e01f7e657b9f4fa9f87d70fa4efe1eeccb769fb23c67fd9bbe74207b6bb95c29c9059d2fc3ae3c96e151b5c56009f1e9ab0e6e44485936
+  access-token-expiration: 9000000      # 150 minutes in ms
+  refresh-token-expiration: 25920000000 # 300 days in ms
+
+# Application
+app:
+  cors:
+    allowed-origins: http://localhost:3000,http://localhost:4200
