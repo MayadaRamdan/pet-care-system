@@ -47,6 +47,8 @@ public class SecurityConfig {
             auth ->
                 auth.requestMatchers("/api/auth/**", "/api/public/**", "/error", "/actuator/health")
                     .permitAll()
+                    .requestMatchers("/swagger-ui/**", "/v3/api-docs/**", "/swagger-ui.html")
+                    .permitAll()
                     .anyRequest()
                     .authenticated() // All customers are equal
             )
@@ -58,8 +60,7 @@ public class SecurityConfig {
 
   @Bean
   public AuthenticationProvider authenticationProvider() {
-    DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider();
-    authProvider.setUserDetailsService(userDetailsService);
+    DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider(userDetailsService);
     authProvider.setPasswordEncoder(passwordEncoder());
     return authProvider;
   }
@@ -81,7 +82,7 @@ public class SecurityConfig {
     configuration.setAllowedOrigins(Arrays.asList(allowedOrigins));
     configuration.setAllowedMethods(
         Arrays.asList("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"));
-    configuration.setAllowedHeaders(Arrays.asList("*"));
+    configuration.setAllowedHeaders(List.of("*"));
     configuration.setExposedHeaders(List.of("Authorization"));
     configuration.setAllowCredentials(true);
     configuration.setMaxAge(3600L);
