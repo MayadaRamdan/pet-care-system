@@ -19,13 +19,6 @@ public class AdminApplication {
   }
 
   @Bean
-  public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-    http.csrf(AbstractHttpConfigurer::disable)
-        .authorizeHttpRequests(auth -> auth.anyRequest().permitAll());
-    return http.build();
-  }
-
-  @Bean
   public AuditorAware<String> auditorProvider() {
     return () -> Optional.of("SYSTEM"); // or current user
   }
