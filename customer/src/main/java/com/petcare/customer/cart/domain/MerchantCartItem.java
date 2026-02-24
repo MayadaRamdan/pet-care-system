@@ -14,14 +14,14 @@ import lombok.Setter;
 @Getter
 @Setter
 @Entity
-@Table(name = "cart_item")
-public class CartItem {
+@Table(name = "merchant_cart_item")
+public class MerchantCartItem {
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
 
-  @ManyToOne private Cart cart;
+  @ManyToOne private MerchantCart merchantCart;
 
   @ManyToOne private Variation variation;
 

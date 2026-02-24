@@ -1,6 +1,6 @@
 package com.petcare.customer.cart.domain;
 
-import com.petcare.customer.customer.domain.Customer;
+import com.petcare.customer.catalog.domain.Merchant;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -16,16 +16,19 @@ import lombok.Setter;
 @Getter
 @Setter
 @Entity
-@Table(name = "cart")
-public class Cart {
+@Table(name = "merchant_cart")
+public class MerchantCart {
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
 
-  private String sessionId;
+  @OneToMany(mappedBy = "merchantCart")
+  private List<MerchantCartItem> items;
 
-  @ManyToOne private Customer customer;
+  @ManyToOne private Merchant merchant;
+
+  private BigDecimal subTotal;
 
   private BigDecimal total;
 }
