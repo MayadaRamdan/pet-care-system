@@ -48,6 +48,9 @@ public class ItemDetailsUseCase {
         IdNameMapper.toIdName(item.getMerchant().getId(), item.getMerchant().getName()),
         variations,
         assetMapper.toDto(item.getThumbnail()),
+        item.getMaxQtyPerCart(),
+        item.getHideWhenOutOfStock(),
+        item.getStockAvailable(),
         getSecondaryCategories(item));
   }
 
@@ -81,7 +84,8 @@ public class ItemDetailsUseCase {
         v.getSalePrice(),
         v.getSalePricePeriod(),
         v.getStockQty(),
-        v.getMaxQtyPerOrder(),
+        v.getMaxQtyPerCart(),
+        v.getHideWhenOutOfStock(),
         assetMapper.toDto(v.getThumbnail()));
   }
 }
