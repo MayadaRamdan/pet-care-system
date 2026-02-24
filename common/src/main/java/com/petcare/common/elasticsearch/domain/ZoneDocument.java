@@ -13,7 +13,7 @@ import org.springframework.data.elasticsearch.core.geo.GeoJsonPolygon;
 @Getter
 @Setter
 @JsonInclude(JsonInclude.Include.NON_NULL)
-@Document(indexName = "zone")
+@Document(indexName = "zone", createIndex = false)
 public class ZoneDocument {
 
   @Id
