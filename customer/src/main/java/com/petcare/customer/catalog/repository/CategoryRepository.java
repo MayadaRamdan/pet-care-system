@@ -23,8 +23,7 @@ public interface CategoryRepository extends JpaRepository<Category, Long> {
       """
               select new com.petcare.customer.catalog.domain.CategoryFlatRow(
               c.id, c.name, c.path, c.thumbnailUrl, c.parent.id, c.displayOrder)
-              from Category c
-              join ZoneCategory zc on zc.categoryId = c.id
+              from ZoneCategory zc join  zc.category c
               where zc.zoneId in :zoneIds
               """)
   List<CategoryFlatRow> listAllForTreeWithinZones(Set<Long> zoneIds);
