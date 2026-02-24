@@ -72,7 +72,9 @@ public class Variation extends Auditable {
 
   private Integer stockQty;
 
-  private Integer maxQtyPerOrder;
+  private Integer maxQtyPerCart;
+
+  private Boolean hideWhenOutOfStock = Boolean.FALSE;
 
   @ManyToOne
   @JoinColumn(name = "thumbnail_id")

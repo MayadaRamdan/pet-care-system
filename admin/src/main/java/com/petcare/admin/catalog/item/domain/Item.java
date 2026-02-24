@@ -79,6 +79,12 @@ public class Item extends Auditable {
 
   private String thumbnailUrl;
 
+  private Boolean stockAvailable = Boolean.TRUE;
+
+  private Boolean hideWhenOutOfStock = Boolean.FALSE;
+
+  private Integer maxQtyPerCart;
+
   public void setStatus(ItemStatus status) {
     this.status = status;
     this.deleted = ItemStatus.DELETED == status;

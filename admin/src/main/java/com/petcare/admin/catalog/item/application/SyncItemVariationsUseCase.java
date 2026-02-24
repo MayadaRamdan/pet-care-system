@@ -94,7 +94,8 @@ public class SyncItemVariationsUseCase {
     target.setSalePrice(dto.salePrice());
     target.setSalePricePeriod(dto.salePricePeriod());
     target.setStockQty(dto.stockQty());
-    target.setMaxQtyPerOrder(dto.maxQtyPerOrder());
+    target.setMaxQtyPerCart(dto.maxQtyPerCart());
+    target.setHideWhenOutOfStock(dto.hideWhenOutOfStock());
   }
 
   private void applyThumbnail(Variation target, AssetDto thumbnailDto) {

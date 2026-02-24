@@ -41,6 +41,9 @@ public class CreateItemUseCase {
       item.setMerchant(merchant);
     }
 
+    item.setMaxQtyPerCart(request.maxQtyPerCart());
+    item.setHideWhenOutOfStock(request.hideWhenOutOfStock());
+
     Item saved = itemRepository.save(item);
     syncItemVariationsUseCase.execute(saved, request.variations());
   }

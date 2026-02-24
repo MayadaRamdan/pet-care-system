@@ -16,5 +16,6 @@ public record VariationDetailsDto(
     BigDecimal salePrice,
     DateTimePeriod salePricePeriod,
     Integer stockQty,
-    Integer maxQtyPerOrder,
+    Integer maxQtyPerCart,
+    Boolean hideWhenOutOfStock,
     AssetDto thumbnail) {}

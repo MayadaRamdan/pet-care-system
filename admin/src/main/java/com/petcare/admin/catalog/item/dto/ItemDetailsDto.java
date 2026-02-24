@@ -15,4 +15,7 @@ public record ItemDetailsDto(
     IdName merchant,
     List<VariationDetailsDto> variations,
     AssetDto thumbnail,
+    Integer maxQtyPerCart,
+    Boolean hideWhenOutOfStock,
+    Boolean stockAvailable,
     List<IdName> secondaryCategories) {}
