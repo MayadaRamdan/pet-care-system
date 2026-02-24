@@ -10,16 +10,20 @@ import org.springframework.data.elasticsearch.repository.config.EnableElasticsea
 @EnableElasticsearchRepositories(basePackages = "com.petcare.common.elasticsearch")
 public class ElasticsearchConfig extends ElasticsearchConfiguration {
 
-  @Value("${elasticsearch.host:localhost}")
-  private String elasticsearchHost;
+  @Value("${spring.elasticsearch.uris}")
+  private String elasticsearchHostAndPort;
 
-  @Value("${elasticsearch.port:9200}")
-  private int elasticsearchPort;
+  @Value("${spring.elasticsearch.socket-timeout}")
+  private Long elasticsearchSocketTimeout;
+
+  @Value("${spring.elasticsearch.connection-timeout}")
+  private Long elasticsearchConnectTimeout;
 
   @Override
   public ClientConfiguration clientConfiguration() {
-    return ClientConfiguration.builder()
-        .connectedTo(elasticsearchHost + ":" + elasticsearchPort)
-        .build();
+    return ClientConfiguration.builder().connectedTo(elasticsearchHostAndPort)
+            .withSocketTimeout(elasticsearchSocketTimeout)
+            .withConnectTimeout(elasticsearchSocketTimeout)
+            .build();
   }
 }
