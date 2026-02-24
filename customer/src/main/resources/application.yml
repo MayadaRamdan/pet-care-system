@@ -1,7 +1,7 @@
 server:
   port: 8084
   servlet:
-    context-path: /admin
+    context-path: /customer
 
 spring:
   application:
@@ -64,5 +64,5 @@ app:
 springdoc:
   swagger-ui:
     path: /docs # Change swagger UI path
-    enabled: false # Disable swagger in production
+    enabled: true # Disable swagger in production
     operationsSorter: method # Sort endpoints
