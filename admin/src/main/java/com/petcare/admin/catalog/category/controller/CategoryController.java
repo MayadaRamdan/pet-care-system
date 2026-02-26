@@ -1,5 +1,6 @@
 package com.petcare.admin.catalog.category.controller;
 
+import com.petcare.admin.catalog.category.application.BuildCategoryAncestorDescendantUseCase;
 import com.petcare.admin.catalog.category.application.CategoryDetailsByIdUseCase;
 import com.petcare.admin.catalog.category.application.CreateCategoryUseCase;
 import com.petcare.admin.catalog.category.application.ListAllCategoriesUseCase;
@@ -32,6 +33,7 @@ public class CategoryController {
   private final UpdateCategoryThumbnailUseCase updateCategoryThumbnailUseCase;
   private final CategoryDetailsByIdUseCase categoryDetailsByIdUseCase;
   private final UpdateCategoriesPathsUseCase updateCategoriesPathsUseCase;
+  private final BuildCategoryAncestorDescendantUseCase buildAncestorDescendantUseCase;
 
   @PostMapping
   public ResponseEntity<Void> createCategory(@RequestBody CreateCategoryRequest request) {
@@ -69,6 +71,12 @@ public class CategoryController {
   @PutMapping("/categories-paths")
   public ResponseEntity<Void> updateCategoriesPaths() {
     updateCategoriesPathsUseCase.execute();
+    return ResponseEntity.ok().build();
+  }
+
+  @PostMapping("/ancestors-and-descendants")
+  public ResponseEntity<Void> buildCategoryDescendant() {
+    buildAncestorDescendantUseCase.execute();
     return ResponseEntity.ok().build();
   }
 }
