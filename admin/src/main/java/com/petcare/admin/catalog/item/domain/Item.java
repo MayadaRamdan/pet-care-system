@@ -71,7 +71,7 @@ public class Item extends Auditable {
 
   @OneToMany(
       mappedBy = "item",
-      cascade = {CascadeType.ALL})
+      cascade = {CascadeType.ALL}, orphanRemoval = true)
   @Where(clause = "deleted = false")
   private List<Variation> variations = new ArrayList<>();
 

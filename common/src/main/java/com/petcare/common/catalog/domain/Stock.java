@@ -21,4 +21,10 @@ public class Stock {
   private Long id;
 
   private int quantity;
+
+  public static Stock of(int quantity) {
+    Stock stock = new Stock();
+    stock.setQuantity(quantity);
+    return stock;
+  }
 }

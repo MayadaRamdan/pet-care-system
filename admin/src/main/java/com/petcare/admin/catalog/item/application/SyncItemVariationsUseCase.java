@@ -3,7 +3,6 @@ package com.petcare.admin.catalog.item.application;
 import com.petcare.admin.catalog.item.domain.Item;
 import com.petcare.admin.catalog.item.domain.Variation;
 import com.petcare.admin.catalog.item.domain.VariationAsset;
-import com.petcare.admin.catalog.item.dto.StockDetailsDto;
 import com.petcare.admin.catalog.item.dto.VariationDetailsDto;
 import com.petcare.admin.catalog.item.repository.ItemRepository;
 import com.petcare.admin.catalog.item.repository.StockRepository;
@@ -13,12 +12,12 @@ import com.petcare.common.asset.domain.Asset;
 import com.petcare.common.asset.dto.AssetDto;
 import com.petcare.common.asset.repository.AssetRepository;
 import com.petcare.common.catalog.domain.Stock;
-import com.petcare.common.catalog.domain.StockDetails;
 import com.petcare.common.catalog.domain.StockMode;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -44,10 +43,22 @@ public class SyncItemVariationsUseCase {
   public void execute(Item item, List<VariationDetailsDto> incoming) {
     Long itemId = item.getId();
 
+    Stock sharedStock = null;
+    if (item.getStockMode() == StockMode.SHARED) {
+      sharedStock = buildCorrectStockForShared(item, incoming);
+    }
+
     Map<Long, Variation> existingById = new HashMap<>();
     for (Variation v : item.getVariations()) {
       if (v.getId() != null) {
         existingById.put(v.getId(), v);
+      }
+    }
+
+    for (VariationDetailsDto dto : incoming) {
+      if (dto.id() != null && existingById.get(dto.id()) == null) {
+        throw new IllegalArgumentException(
+            "Variation id " + dto.id() + " does not belong to item id " + itemId);
       }
     }
 
@@ -61,19 +72,19 @@ public class SyncItemVariationsUseCase {
       Variation variation;
       if (dto.id() == null) {
         variation = new Variation();
-        variation.setItem(item);
         item.getVariations().add(variation);
       } else {
         variation = existingById.get(dto.id());
-        if (variation == null) {
-          throw new IllegalArgumentException(
-              "Variation id " + dto.id() + " does not belong to item id " + itemId);
-        }
         keptIds.add(dto.id());
       }
-      copyBasicInfo(variation, dto);
 
-      // applyThumbnail(variation, dto.thumbnail());
+      existingById.get(dto.id());
+
+      if (item.getStockMode() == StockMode.SHARED) {
+        variation.setStock(sharedStock);
+      }
+
+      copyBasicInfo(variation, dto, item);
       syncItemAssets(variation, dto.assets(), dto.thumbnail());
     }
 
@@ -88,36 +99,15 @@ public class SyncItemVariationsUseCase {
               variationRepository.delete(v);
             });
 
-    // Cascade persists new/updated variations
-    itemRepository.save(item);
-
     // Clean in-memory collection after deletes
     item.getVariations().removeIf(v -> v.getId() != null && !keptIds.contains(v.getId()));
-
-    // Sync stock for variations based on stock mode
-    syncVariationsStock(item, incoming);
   }
 
-  private void syncVariationsStock(Item item, List<VariationDetailsDto> incoming) {
-    StockMode stockMode = (item.getStockMode() == null) ? StockMode.DEDICATED : item.getStockMode();
+  private Stock buildCorrectStockForShared(Item item, List<VariationDetailsDto> incoming) {
 
-    switch (stockMode) {
-      case SHARED:
-        syncSharedStock(item, incoming);
-        break;
-      case DEDICATED:
-        syncDedicatedStock(item, incoming);
-        break;
-    }
-  }
-
-  private void syncSharedStock(Item item, List<VariationDetailsDto> incoming) {
-    // For shared mode, all variations share one stock object
-    // Use the stockDetails from the variation with minimum unitCapacity
-    StockDetailsDto minUnitCapacityStockDetails =
+    VariationDetailsDto variationWithMinCapacity =
         incoming.stream()
-            .filter(dto -> dto != null && dto.stockDetails() != null)
-            .map(VariationDetailsDto::stockDetails)
+            .filter(Objects::nonNull)
             .min(
                 (s1, s2) -> {
                   Integer cap1 = s1.unitCapacity() != null ? s1.unitCapacity() : 1;
@@ -126,104 +116,28 @@ public class SyncItemVariationsUseCase {
                 })
             .orElse(null);
 
-    if (minUnitCapacityStockDetails == null) {
-      return;
+    int stockQty = 0;
+    if (variationWithMinCapacity != null) {
+      if (variationWithMinCapacity.stockQty() != null
+          && variationWithMinCapacity.unitCapacity() != null) {
+        stockQty = variationWithMinCapacity.stockQty() * variationWithMinCapacity.unitCapacity();
+      }
     }
 
-    // Find or create the shared stock
-    Stock sharedStock =
+    Stock stock =
         item.getVariations().stream()
-            .filter(v -> v.getStockDetails() != null && v.getStockDetails().getStock() != null)
-            .map(v -> v.getStockDetails().getStock())
+            .map(Variation::getStock)
+            .filter(Objects::nonNull)
             .findFirst()
-            .orElseGet(
-                () -> {
-                  Stock newStock = new Stock();
-                  newStock.setQuantity(0);
-                  return stockRepository.save(newStock);
-                });
+            .orElse(stockRepository.save(Stock.of(stockQty)));
 
-    // Update shared stock quantity based on min unitCapacity
-    sharedStock.setQuantity(
-        minUnitCapacityStockDetails.stockQty() != null
-            ? minUnitCapacityStockDetails.stockQty()
-                * (minUnitCapacityStockDetails.unitCapacity() != null
-                    ? minUnitCapacityStockDetails.unitCapacity()
-                    : 1)
-            : 0);
-    stockRepository.save(sharedStock);
+    stock.setQuantity(stockQty);
 
-    // Apply the same stock to all variations with their own stockDetails
-    Map<Long, StockDetailsDto> stockByVariationId = new HashMap<>();
-    for (VariationDetailsDto dto : incoming) {
-      if (dto != null && dto.id() != null && dto.stockDetails() != null) {
-        stockByVariationId.put(dto.id(), dto.stockDetails());
-      }
-    }
-
-    for (Variation variation : item.getVariations()) {
-      if (variation.getId() != null) {
-        StockDetailsDto stockDto = stockByVariationId.get(variation.getId());
-        if (stockDto == null) {
-          continue;
-        }
-
-        StockDetails stockDetails = new StockDetails();
-        stockDetails.setStock(sharedStock);
-        stockDetails.setUnitCapacity(stockDto.unitCapacity());
-        stockDetails.setHideWhenOutOfStock(stockDto.hideWhenOutOfStock());
-        variation.setStockDetails(stockDetails);
-      }
-    }
+    return stock;
   }
 
-  private void syncDedicatedStock(Item item, List<VariationDetailsDto> incoming) {
-    // For dedicated mode, each variation has its own stock object
-    Map<Long, StockDetailsDto> stockByVariationId = new HashMap<>();
-    for (VariationDetailsDto dto : incoming) {
-      if (dto != null && dto.id() != null && dto.stockDetails() != null) {
-        stockByVariationId.put(dto.id(), dto.stockDetails());
-      }
-    }
-
-    for (Variation variation : item.getVariations()) {
-      if (variation.getId() == null) {
-        continue;
-      }
-
-      StockDetailsDto stockDto = stockByVariationId.get(variation.getId());
-      if (stockDto == null) {
-        continue;
-      }
-
-      // Find or create stock for this variation
-      Stock stock;
-      if (variation.getStockDetails() != null && variation.getStockDetails().getStock() != null) {
-        stock = variation.getStockDetails().getStock();
-      } else {
-        stock = new Stock();
-        stock.setQuantity(0);
-        stock = stockRepository.save(stock);
-      }
-
-      // Update stock quantity
-      stock.setQuantity(
-          stockDto.stockQty() != null
-              ? stockDto.stockQty()
-                  * (stockDto.unitCapacity() != null ? stockDto.unitCapacity() : 1)
-              : 0);
-      stockRepository.save(stock);
-
-      // Update variation's stock details
-      StockDetails stockDetails = new StockDetails();
-      stockDetails.setStock(stock);
-      stockDetails.setUnitCapacity(stockDto.unitCapacity());
-      stockDetails.setHideWhenOutOfStock(stockDto.hideWhenOutOfStock());
-      variation.setStockDetails(stockDetails);
-    }
-  }
-
-  private void copyBasicInfo(Variation target, VariationDetailsDto dto) {
+  private void copyBasicInfo(Variation target, VariationDetailsDto dto, Item item) {
+    target.setItem(item);
     target.setName(dto.name());
     target.setDescription(dto.description());
     target.setSku(dto.sku());
@@ -232,8 +146,19 @@ public class SyncItemVariationsUseCase {
     target.setSalePrice(dto.salePrice());
     target.setSalePricePeriod(dto.salePricePeriod());
     target.setMaxQtyPerCart(dto.maxQtyPerCart());
-    // target.setStockQty(dto.stockQty());
-    // target.setHideWhenOutOfStock(dto.hideWhenOutOfStock());
+    target.setHideWhenOutOfStock(dto.hideWhenOutOfStock());
+
+    StockMode stockMode = item.getStockMode();
+    target.setStockMode(stockMode);
+    target.setUnitCapacity((stockMode == StockMode.SHARED) ? dto.unitCapacity() : 1);
+
+    if (stockMode == StockMode.DEDICATED) {
+      if (target.getStock() == null) {
+        target.setStock(stockRepository.save(Stock.of(dto.stockQty())));
+      } else {
+        target.getStock().setQuantity(dto.stockQty());
+      }
+    }
   }
 
   private void syncItemAssets(Variation variation, List<AssetDto> assets, AssetDto thumbnailDto) {

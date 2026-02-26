@@ -5,12 +5,10 @@ import com.petcare.admin.catalog.item.domain.CategoryItem;
 import com.petcare.admin.catalog.item.domain.Item;
 import com.petcare.admin.catalog.item.domain.Variation;
 import com.petcare.admin.catalog.item.dto.ItemDetailsDto;
-import com.petcare.admin.catalog.item.dto.StockDetailsDto;
 import com.petcare.admin.catalog.item.dto.VariationDetailsDto;
 import com.petcare.admin.catalog.item.repository.ItemRepository;
 import com.petcare.common.asset.dto.AssetDto;
 import com.petcare.common.asset.mapper.AssetMapper;
-import com.petcare.common.catalog.domain.StockDetails;
 import com.petcare.common.common.dto.IdName;
 import com.petcare.common.common.mapper.IdNameMapper;
 import java.util.List;
@@ -87,8 +85,6 @@ public class ItemDetailsUseCase {
   }
 
   private VariationDetailsDto toVariationDetailsDto(Variation v) {
-    StockDetails stockDetails = v.getStockDetails();
-
     List<AssetDto> assetDtos = null;
 
     if (v.getAssets() != null) {
@@ -107,10 +103,10 @@ public class ItemDetailsUseCase {
         v.getPrice(),
         v.getSalePrice(),
         v.getSalePricePeriod(),
-        new StockDetailsDto(
-            stockDetails.getUnitCapacity(),
-            stockDetails.getStockQty(),
-            stockDetails.getHideWhenOutOfStock()),
+        v.getStockMode(),
+        v.getUnitCapacity(),
+        v.getHideWhenOutOfStock(),
+        v.getStockQty(),
         v.getMaxQtyPerCart(),
         assetMapper.toDto(v.getThumbnail()),
         assetDtos);

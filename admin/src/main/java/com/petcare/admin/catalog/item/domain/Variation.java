@@ -1,7 +1,8 @@
 package com.petcare.admin.catalog.item.domain;
 
 import com.petcare.common.asset.domain.Asset;
-import com.petcare.common.catalog.domain.StockDetails;
+import com.petcare.common.catalog.domain.Stock;
+import com.petcare.common.catalog.domain.StockMode;
 import com.petcare.common.common.domain.Auditable;
 import com.petcare.common.common.embeddable.DateTimePeriod;
 import com.petcare.common.common.embeddable.LocalizableString;
@@ -74,7 +75,16 @@ public class Variation extends Auditable {
   })
   private DateTimePeriod salePricePeriod;
 
-  @Embedded private StockDetails stockDetails;
+  @ManyToOne
+  @JoinColumn(name = "stock_id", nullable = false)
+  private Stock stock;
+
+  @Enumerated(EnumType.STRING)
+  private StockMode stockMode;
+
+  private Integer unitCapacity;
+
+  private Boolean hideWhenOutOfStock = Boolean.FALSE;
 
   private Integer maxQtyPerCart;
 
@@ -87,4 +97,13 @@ public class Variation extends Auditable {
   @OneToMany
   @JoinColumn(name = "variation_id")
   private List<VariationAsset> assets;
+
+  public int getUnitCapacity() {
+    if (this.unitCapacity == null || this.unitCapacity < 1) return 1;
+    return this.unitCapacity;
+  }
+
+  public Integer getStockQty() {
+    return stock.getQuantity() / getUnitCapacity();
+  }
 }
