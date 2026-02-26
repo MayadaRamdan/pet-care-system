@@ -129,7 +129,11 @@ public class SyncItemVariationsUseCase {
             .map(Variation::getStock)
             .filter(Objects::nonNull)
             .findFirst()
-            .orElse(stockRepository.save(Stock.of(stockQty)));
+            .orElse(null);
+
+    if (stock == null) {
+      stock = stockRepository.save(Stock.of(stockQty));
+    }
 
     stock.setQuantity(stockQty);
 
