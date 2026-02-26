@@ -1,4 +1,4 @@
-package com.petcare.common.catalog;
+package com.petcare.common.catalog.domain;
 
 import java.io.Serializable;
 import java.util.Objects;
@@ -7,22 +7,21 @@ import lombok.NoArgsConstructor;
 
 @NoArgsConstructor
 @AllArgsConstructor
-public class ZoneCategoryPK implements Serializable {
+public class CategoryItemPK implements Serializable {
 
-  private long zoneId;
   private long categoryId;
+  private long itemId;
 
   @Override
   public int hashCode() {
-    return Objects.hash(zoneId, categoryId);
+    return Objects.hash(categoryId, itemId);
   }
 
   @Override
   public boolean equals(Object obj) {
-    if (!(obj instanceof ZoneCategoryPK other)) {
+    if (!(obj instanceof CategoryItemPK other)) {
       return false;
     }
-
-    return this.zoneId == other.zoneId && this.categoryId == other.categoryId;
+    return this.categoryId == other.categoryId && this.itemId == other.itemId;
   }
 }

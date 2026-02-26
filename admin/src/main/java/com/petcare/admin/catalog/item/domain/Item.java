@@ -3,6 +3,7 @@ package com.petcare.admin.catalog.item.domain;
 import com.petcare.admin.catalog.category.domain.Category;
 import com.petcare.admin.merchant.domain.Merchant;
 import com.petcare.common.asset.domain.Asset;
+import com.petcare.common.catalog.domain.StockMode;
 import com.petcare.common.common.domain.Auditable;
 import com.petcare.common.common.embeddable.LocalizableString;
 import jakarta.persistence.AttributeOverride;
@@ -20,6 +21,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
+import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import java.util.ArrayList;
 import java.util.List;
@@ -61,7 +63,7 @@ public class Item extends Auditable {
   private Category category;
 
   @OneToMany(mappedBy = "item", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-  private List<CategoryProduct> categories;
+  private List<CategoryItem> categories;
 
   @ManyToOne
   @JoinColumn(name = "merchant_id")
@@ -73,17 +75,24 @@ public class Item extends Auditable {
   @Where(clause = "deleted = false")
   private List<Variation> variations = new ArrayList<>();
 
-  @ManyToOne
+  @OneToOne
   @JoinColumn(name = "thumbnail_id")
   private Asset thumbnail;
 
   private String thumbnailUrl;
+
+  @OneToMany
+  @JoinColumn(name = "item_id")
+  private List<ItemAsset> assets;
 
   private Boolean stockAvailable = Boolean.TRUE;
 
   private Boolean hideWhenOutOfStock = Boolean.FALSE;
 
   private Integer maxQtyPerCart;
+
+  @Enumerated(EnumType.STRING)
+  private StockMode stockMode;
 
   public void setStatus(ItemStatus status) {
     this.status = status;

@@ -1,6 +1,7 @@
 package com.petcare.admin.catalog.item.domain;
 
 import com.petcare.common.asset.domain.Asset;
+import com.petcare.common.catalog.domain.StockDetails;
 import com.petcare.common.common.domain.Auditable;
 import com.petcare.common.common.embeddable.DateTimePeriod;
 import com.petcare.common.common.embeddable.LocalizableString;
@@ -16,8 +17,11 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import java.math.BigDecimal;
+import java.util.List;
 import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.SQLDelete;
@@ -70,15 +74,17 @@ public class Variation extends Auditable {
   })
   private DateTimePeriod salePricePeriod;
 
-  private Integer stockQty;
+  @Embedded private StockDetails stockDetails;
 
   private Integer maxQtyPerCart;
 
-  private Boolean hideWhenOutOfStock = Boolean.FALSE;
-
-  @ManyToOne
+  @OneToOne
   @JoinColumn(name = "thumbnail_id")
   private Asset thumbnail;
 
   private String thumbnailUrl;
+
+  @OneToMany
+  @JoinColumn(name = "variation_id")
+  private List<VariationAsset> assets;
 }

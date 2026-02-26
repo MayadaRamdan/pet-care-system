@@ -1,6 +1,6 @@
 package com.petcare.customer.catalog.domain;
 
-import com.petcare.common.catalog.ZoneCategoryPK;
+import com.petcare.common.catalog.domain.ZoneCategoryPK;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.IdClass;

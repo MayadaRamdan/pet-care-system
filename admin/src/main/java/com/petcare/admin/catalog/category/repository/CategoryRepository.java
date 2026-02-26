@@ -43,4 +43,7 @@ public interface CategoryRepository extends JpaRepository<Category, Long> {
           from Category c where c.id in :ids
           """)
   List<IdName> listCategoriesByIdIn(Set<Long> ids);
+
+  @Query(value = "select distinct c from Category c where c.id in :categoriesIds ")
+  Set<Category> getByIds(Set<Long> categoriesIds);
 }

@@ -5,6 +5,7 @@ import com.petcare.common.asset.dto.AssetDto;
 import com.petcare.common.common.embeddable.DateTimePeriod;
 import com.petcare.common.common.embeddable.LocalizableString;
 import java.math.BigDecimal;
+import java.util.List;
 
 public record VariationDetailsDto(
     Long id,
@@ -15,7 +16,7 @@ public record VariationDetailsDto(
     BigDecimal price,
     BigDecimal salePrice,
     DateTimePeriod salePricePeriod,
-    Integer stockQty,
+    StockDetailsDto stockDetails,
     Integer maxQtyPerCart,
-    Boolean hideWhenOutOfStock,
-    AssetDto thumbnail) {}
+    AssetDto thumbnail,
+    List<AssetDto> assets) {}
