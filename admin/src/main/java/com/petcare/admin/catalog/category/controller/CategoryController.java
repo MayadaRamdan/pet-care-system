@@ -4,6 +4,7 @@ import com.petcare.admin.catalog.category.application.CategoryDetailsByIdUseCase
 import com.petcare.admin.catalog.category.application.CreateCategoryUseCase;
 import com.petcare.admin.catalog.category.application.ListAllCategoriesUseCase;
 import com.petcare.admin.catalog.category.application.ListCategoriesByParentIdUseCase;
+import com.petcare.admin.catalog.category.application.UpdateCategoriesPathsUseCase;
 import com.petcare.admin.catalog.category.application.UpdateCategoryThumbnailUseCase;
 import com.petcare.admin.catalog.category.dto.CreateCategoryRequest;
 import com.petcare.common.common.response.ApiResponse;
@@ -13,6 +14,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -29,6 +31,7 @@ public class CategoryController {
   private final ListCategoriesByParentIdUseCase listCategoriesByParentIdUseCase;
   private final UpdateCategoryThumbnailUseCase updateCategoryThumbnailUseCase;
   private final CategoryDetailsByIdUseCase categoryDetailsByIdUseCase;
+  private final UpdateCategoriesPathsUseCase updateCategoriesPathsUseCase;
 
   @PostMapping
   public ResponseEntity<Void> createCategory(@RequestBody CreateCategoryRequest request) {
@@ -60,6 +63,12 @@ public class CategoryController {
       @RequestParam(name = "file", required = false) MultipartFile file)
       throws IOException {
     updateCategoryThumbnailUseCase.execute(categoryId, file);
+    return ResponseEntity.ok().build();
+  }
+
+  @PutMapping("/categories-paths")
+  public ResponseEntity<Void> updateCategoriesPaths() {
+    updateCategoriesPathsUseCase.execute();
     return ResponseEntity.ok().build();
   }
 }
