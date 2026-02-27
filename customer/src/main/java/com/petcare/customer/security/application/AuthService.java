@@ -12,9 +12,9 @@ import com.petcare.customer.redis.domain.RefreshToken;
 import com.petcare.customer.security.dto.AuthResponse;
 import com.petcare.customer.security.dto.UserInfo;
 import com.petcare.customer.security.utils.JwtUtil;
+import com.petcare.customer.utils.HttpServletRequestUtils;
 import jakarta.servlet.http.HttpServletRequest;
 import java.time.Instant;
-import java.util.Collections;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -63,7 +63,9 @@ public class AuthService {
     String accessToken = jwtUtil.generateAccessToken(user);
     RefreshToken refreshToken =
         refreshTokenService.createRefreshToken(
-            user.getId(), getDeviceInfo(httpRequest), getClientIp(httpRequest));
+            user.getId(),
+            HttpServletRequestUtils.getDeviceInfo(httpRequest),
+            HttpServletRequestUtils.getClientIp(httpRequest));
 
     log.info("User logged in successfully: {}", user.getUsername());
 
@@ -125,7 +127,9 @@ public class AuthService {
     String accessToken = jwtUtil.generateAccessToken(user);
     RefreshToken newRefreshToken =
         refreshTokenService.createRefreshToken(
-            user.getId(), getDeviceInfo(httpRequest), getClientIp(httpRequest));
+            user.getId(),
+            HttpServletRequestUtils.getDeviceInfo(httpRequest),
+            HttpServletRequestUtils.getClientIp(httpRequest));
 
     log.info("Token refreshed for user: {}", user.getUsername());
 
@@ -157,20 +161,6 @@ public class AuthService {
             user.getUsername(),
             user.getEmail(),
             user.getFullName(),
-            Collections.emptySet(), // Empty set
             user.getAvatarUrl()));
-  }
-
-  private String getDeviceInfo(HttpServletRequest request) {
-    String userAgent = request.getHeader("User-Agent");
-    return userAgent != null ? userAgent : "Unknown";
-  }
-
-  private String getClientIp(HttpServletRequest request) {
-    String xForwardedFor = request.getHeader("X-Forwarded-For");
-    if (xForwardedFor != null && !xForwardedFor.isEmpty()) {
-      return xForwardedFor.split(",")[0].trim();
-    }
-    return request.getRemoteAddr();
   }
 }

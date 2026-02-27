@@ -1,8 +1,8 @@
 package com.petcare.admin.zonemerchant.application;
 
-import com.petcare.admin.zonemerchant.domain.ZoneMerchantBasicInfo;
 import com.petcare.admin.zonemerchant.dto.ZoneMerchantsResponse;
 import com.petcare.admin.zonemerchant.repository.ZoneMerchantRepository;
+import com.petcare.common.common.dto.IdName;
 import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -18,7 +18,7 @@ public class GetZoneMerchantsUseCase {
   private final ZoneMerchantRepository zoneMerchantRepository;
 
   public ZoneMerchantsResponse execute(Long zoneId) {
-    List<ZoneMerchantBasicInfo> merchants = zoneMerchantRepository.findMerchantsForZone(zoneId);
+    List<IdName> merchants = zoneMerchantRepository.findMerchantsForZone(zoneId);
     return new ZoneMerchantsResponse(merchants);
   }
 }

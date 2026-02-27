@@ -20,7 +20,7 @@ import org.hibernate.annotations.SQLDelete;
 @Getter
 @Setter
 @Entity
-@Table(name = "merchantIds")
+@Table(name = "merchant")
 @SQLDelete(
     sql = "UPDATE merchant SET deleted = true, active= false, deleted_at = now() WHERE id = ?")
 public class Merchant extends Auditable {

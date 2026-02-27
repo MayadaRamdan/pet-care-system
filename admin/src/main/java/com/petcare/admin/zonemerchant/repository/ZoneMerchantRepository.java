@@ -1,7 +1,7 @@
 package com.petcare.admin.zonemerchant.repository;
 
 import com.petcare.admin.zonemerchant.domain.ZoneMerchant;
-import com.petcare.admin.zonemerchant.domain.ZoneMerchantBasicInfo;
+import com.petcare.common.common.dto.IdName;
 import com.petcare.common.zonemerchant.ZoneMerchantPK;
 import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -17,7 +17,7 @@ public interface ZoneMerchantRepository extends JpaRepository<ZoneMerchant, Zone
 
   @Query(
       value =
-          "select new com.petcare.admin.zonemerchant.domain.ZoneMerchantBasicInfo(m.id, m.name.english)"
+          "select new com.petcare.common.common.dto.IdName(m.id,  m.name.english)"
               + " from ZoneMerchant zm join zm.merchant m where zm.zone.id = :zoneId")
-  List<ZoneMerchantBasicInfo> findMerchantsForZone(long zoneId);
+  List<IdName> findMerchantsForZone(long zoneId);
 }

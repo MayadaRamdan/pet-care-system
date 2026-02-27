@@ -3,6 +3,7 @@ package com.petcare.admin.zone.application;
 import com.petcare.admin.zone.domain.Zone;
 import com.petcare.admin.zone.dto.ZoneDetailsDto;
 import com.petcare.admin.zone.repository.ZoneRepository;
+import com.petcare.admin.zonemerchant.repository.ZoneMerchantRepository;
 import com.petcare.common.common.dto.IdName;
 import com.petcare.common.elasticsearch.dto.GeoPointDto;
 import com.petcare.common.exception.domain.ResourceNotFoundException;
@@ -19,6 +20,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class ZoneDetailsByIdUseCase {
 
   private final ZoneRepository zoneRepository;
+  private final ZoneMerchantRepository zoneMerchantRepository;
 
   public ZoneDetailsDto execute(Long id) {
     Zone zone =
@@ -27,7 +29,7 @@ public class ZoneDetailsByIdUseCase {
     List<GeoPointDto> points =
         zone.getCoordinates().stream().map(p -> new GeoPointDto(p.getLat(), p.getLon())).toList();
 
-    List<IdName> zoneMerchants = zoneRepository.findZoneMerchants(id);
+    List<IdName> zoneMerchants = zoneMerchantRepository.findMerchantsForZone(id);
     return new ZoneDetailsDto(
         zone.getId(), zone.getCode(), zone.getName(), zone.getStatus(), points, zoneMerchants);
   }

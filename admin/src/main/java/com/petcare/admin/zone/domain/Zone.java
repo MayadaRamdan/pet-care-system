@@ -1,6 +1,5 @@
 package com.petcare.admin.zone.domain;
 
-import com.petcare.admin.merchant.domain.Merchant;
 import com.petcare.common.common.domain.Auditable;
 import com.petcare.common.common.embeddable.LocalizableString;
 import com.petcare.common.geo.domain.Point;
@@ -13,12 +12,10 @@ import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
-import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
-import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.Pattern;
 import java.util.List;
@@ -54,7 +51,4 @@ public class Zone extends Auditable {
 
   @Enumerated(EnumType.STRING)
   private ZoneStatus status;
-
-  @OneToMany(fetch = FetchType.LAZY)
-  private List<Merchant> merchants;
 }
