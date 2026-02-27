@@ -5,7 +5,7 @@ import com.petcare.admin.merchant.repository.MerchantRepository;
 import com.petcare.admin.zone.domain.Zone;
 import com.petcare.admin.zone.repository.ZoneRepository;
 import com.petcare.admin.zonemerchant.domain.ZoneMerchant;
-import com.petcare.admin.zonemerchant.dto.UpdateZoneStoresRequest;
+import com.petcare.admin.zonemerchant.dto.UpdateZoneMerchantRequest;
 import com.petcare.admin.zonemerchant.repository.ZoneMerchantRepository;
 import com.petcare.common.exception.domain.ResourceNotFoundException;
 import java.util.List;
@@ -19,23 +19,23 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 @AllArgsConstructor
 @Transactional
-public class UpdateZoneStoresUseCase {
+public class UpdateZoneMerchantsUseCase {
 
   private final ZoneRepository zoneRepository;
   private final MerchantRepository merchantRepository;
   private final ZoneMerchantRepository zoneMerchantRepository;
 
-  public void execute(UpdateZoneStoresRequest request) {
-    log.info("Updating stores for zoneId={}, storeIds={}", request.zoneId(), request.storeIds());
+  public void execute(UpdateZoneMerchantRequest request) {
+    log.info("Updating merchants for zoneId={}, merchantIds={}", request.zoneId(), request.merchantIds());
 
     Zone zone =
         zoneRepository
             .findById(request.zoneId())
             .orElseThrow(() -> new ResourceNotFoundException("Zone" + request.zoneId()));
 
-    List<Merchant> merchants = merchantRepository.findAllById(request.storeIds());
+    List<Merchant> merchants = merchantRepository.findAllById(request.merchantIds());
 
-    validateAllMerchantsFound(request.storeIds(), merchants);
+    validateAllMerchantsFound(request.merchantIds(), merchants);
 
     List<ZoneMerchant> zoneMerchants =
         merchants.stream().map(merchant -> ZoneMerchant.of(zone, merchant)).toList();
@@ -45,7 +45,7 @@ public class UpdateZoneStoresUseCase {
     zoneMerchantRepository.saveAll(zoneMerchants);
 
     log.info(
-        "Successfully updated {} stores for zoneId={}", zoneMerchants.size(), request.zoneId());
+        "Successfully updated {} merchants for zoneId={}", zoneMerchants.size(), request.zoneId());
   }
 
   private void validateAllMerchantsFound(List<Long> requestedIds, List<Merchant> foundMerchants) {

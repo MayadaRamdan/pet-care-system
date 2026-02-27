@@ -32,7 +32,7 @@ public class UpdateZoneMerchantsUseCase {
     Set<Long> dbMerchantsIds = merchants.stream().map(Merchant::getId).collect(Collectors.toSet());
     for (Long id : merchantIds) {
       if (!dbMerchantsIds.contains(id)) {
-        throw new ResourceNotFoundException("merchant" + id);
+        throw new ResourceNotFoundException("merchantIds" + id);
       }
     }
 
