@@ -3,11 +3,12 @@ package com.petcare.admin.catalog.category.application;
 import com.petcare.admin.catalog.category.domain.PathUpdateCategoryRow;
 import com.petcare.admin.catalog.category.repository.CategoryRepository;
 import com.petcare.common.common.domain.Constants;
+import java.util.ArrayDeque;
 import java.util.ArrayList;
+import java.util.Deque;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -23,85 +24,100 @@ public class UpdateCategoriesPathsUseCase {
   private final CategoryRepository categoryRepository;
   private final JdbcTemplate jdbcTemplate;
 
-  record PathValue(String en, String ar) {}
+  private record PathValue(String en, String ar) {}
+
+  private record CategoryGraph(
+          Map<Long, PathUpdateCategoryRow> categoryMap,
+          Map<Long, List<Long>> childrenMap,
+          List<Long> roots) {}
+
+  // -------------------------------------------------------------------------
+  // Public entry point
+  // -------------------------------------------------------------------------
 
   public void execute() {
-
     List<PathUpdateCategoryRow> rows = categoryRepository.findCategoriesRows();
+    log.info("Starting path update for {} categories", rows.size());
 
-    Map<Long, PathUpdateCategoryRow> categoryMap =
-        rows.stream().collect(Collectors.toMap(PathUpdateCategoryRow::id, r -> r));
+    CategoryGraph graph = buildGraph(rows);
+    Map<Long, PathValue> computedPaths = computeAllPaths(graph);
+    batchUpdate(computedPaths);
 
-    Map<Long, List<Long>> childrenMap = buildChildrenMap(rows);
+    log.info("Successfully updated paths for {} categories", computedPaths.size());
+  }
 
-    Map<Long, PathValue> computedPaths = new HashMap<>();
+  // -------------------------------------------------------------------------
+  // Step 1 — build lookup structures in a single pass
+  // -------------------------------------------------------------------------
+
+  private CategoryGraph buildGraph(List<PathUpdateCategoryRow> rows) {
+    Map<Long, PathUpdateCategoryRow> categoryMap = new HashMap<>(rows.size() * 2);
+    Map<Long, List<Long>> childrenMap = new HashMap<>(rows.size() * 2);
+    List<Long> roots = new ArrayList<>();
 
     for (PathUpdateCategoryRow row : rows) {
+      categoryMap.put(row.id(), row);
+
       if (row.parentId() == null) {
-        computePathRecursive(row.id(), categoryMap, childrenMap, computedPaths);
+        roots.add(row.id());
+      } else {
+        childrenMap.computeIfAbsent(row.parentId(), k -> new ArrayList<>()).add(row.id());
       }
     }
 
-    batchUpdate(computedPaths);
+    return new CategoryGraph(categoryMap, childrenMap, roots);
   }
 
-  private Map<Long, List<Long>> buildChildrenMap(List<PathUpdateCategoryRow> rows) {
-    Map<Long, List<Long>> childrenMap = new HashMap<>();
+  // -------------------------------------------------------------------------
+  // Step 2 — compute paths iteratively (BFS) to avoid StackOverflowError
+  // -------------------------------------------------------------------------
 
-    for (PathUpdateCategoryRow r : rows) {
-      childrenMap.computeIfAbsent(r.parentId(), k -> new ArrayList<>()).add(r.id());
-    }
+  private Map<Long, PathValue> computeAllPaths(CategoryGraph graph) {
+    Map<Long, PathValue> computedPaths = new HashMap<>(graph.categoryMap().size() * 2);
+    Deque<Long> queue = new ArrayDeque<>(graph.roots());
 
-    return childrenMap;
-  }
+    while (!queue.isEmpty()) {
+      Long id = queue.poll();
+      PathUpdateCategoryRow row = graph.categoryMap().get(id);
 
-  private void computePathRecursive(
-      Long id,
-      Map<Long, PathUpdateCategoryRow> categoryMap,
-      Map<Long, List<Long>> childrenMap,
-      Map<Long, PathValue> computedPaths) {
+      PathValue path = buildPath(row, computedPaths);
+      computedPaths.put(id, path);
 
-    PathUpdateCategoryRow row = categoryMap.get(id);
-
-    PathValue parentPath = null;
-
-    if (row.parentId() != null) {
-      parentPath = computedPaths.get(row.parentId());
-    }
-
-    String en =
-        parentPath == null
-            ? row.englishName()
-            : parentPath.en() + Constants.CATEGORY_PATH_SEPARATOR + row.englishName();
-
-    String ar =
-        parentPath == null
-            ? row.arabicName()
-            : parentPath.ar() + Constants.CATEGORY_PATH_SEPARATOR + row.arabicName();
-
-    PathValue path = new PathValue(en, ar);
-
-    computedPaths.put(id, path);
-
-    List<Long> children = childrenMap.get(id);
-
-    if (children != null) {
-      for (Long child : children) {
-        computePathRecursive(child, categoryMap, childrenMap, computedPaths);
+      List<Long> children = graph.childrenMap().get(id);
+      if (children != null) {
+        queue.addAll(children);
       }
     }
+
+    return computedPaths;
   }
+
+  private PathValue buildPath(PathUpdateCategoryRow row, Map<Long, PathValue> computedPaths) {
+    if (row.parentId() == null) {
+      return new PathValue(row.englishName(), row.arabicName());
+    }
+
+    PathValue parentPath = computedPaths.get(row.parentId());
+
+    String en = String.join(Constants.CATEGORY_PATH_SEPARATOR, parentPath.en(), row.englishName());
+    String ar = String.join(Constants.CATEGORY_PATH_SEPARATOR, parentPath.ar(), row.arabicName());
+
+    return new PathValue(en, ar);
+  }
+
+  // -------------------------------------------------------------------------
+  // Step 3 — persist in batches
+  // -------------------------------------------------------------------------
 
   private void batchUpdate(Map<Long, PathValue> paths) {
-
     jdbcTemplate.batchUpdate(
-        "UPDATE category SET english_path = ?, arabic_path = ? WHERE id = ?",
-        paths.entrySet(),
-        200,
-        (ps, entry) -> {
-          ps.setString(1, entry.getValue().en());
-          ps.setString(2, entry.getValue().ar());
-          ps.setLong(3, entry.getKey());
-        });
+            "UPDATE category SET english_path = ?, arabic_path = ? WHERE id = ?",
+            paths.entrySet(),
+            200,
+            (ps, entry) -> {
+              ps.setString(1, entry.getValue().en());
+              ps.setString(2, entry.getValue().ar());
+              ps.setLong(3, entry.getKey());
+            });
   }
 }
