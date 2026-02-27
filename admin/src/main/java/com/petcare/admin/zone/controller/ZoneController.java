@@ -10,6 +10,7 @@ import com.petcare.admin.zone.dto.UpdateZoneCoordinatesRequest;
 import com.petcare.admin.zone.dto.ZoneDetailsDto;
 import com.petcare.admin.zone.dto.ZoneListingDto;
 import com.petcare.common.common.dto.IdsListHolder;
+import com.petcare.common.common.response.ApiResponse;
 import lombok.AllArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -34,9 +35,9 @@ public class ZoneController {
   private final UpdateZoneMerchantsUseCase updateZoneMerchantsUseCase;
 
   @PostMapping
-  public ResponseEntity<Void> createZone(@RequestBody CreateZoneRequest request) {
+  public ResponseEntity<ApiResponse> createZone(@RequestBody CreateZoneRequest request) {
     createZoneUseCase.execute(request);
-    return ResponseEntity.ok().build();
+    return ResponseEntity.ok(ApiResponse.success());
   }
 
   @GetMapping
@@ -50,16 +51,16 @@ public class ZoneController {
   }
 
   @PutMapping("/{id}/coordinates")
-  public ResponseEntity<Void> updateZoneCoordinates(
+  public ResponseEntity<ApiResponse> updateZoneCoordinates(
       @PathVariable(name = "id") Long zoneId, @RequestBody UpdateZoneCoordinatesRequest request) {
     updateZoneCoordinatesUseCase.execute(zoneId, request.coordinates());
-    return ResponseEntity.ok().build();
+    return ResponseEntity.ok(ApiResponse.success());
   }
 
   @PutMapping("/{id}/merchants")
-  public ResponseEntity<Void> updateZoneMerchants(
+  public ResponseEntity<ApiResponse> updateZoneMerchants(
       @PathVariable(name = "id") Long zoneId, @RequestBody IdsListHolder request) {
     updateZoneMerchantsUseCase.execute(zoneId, request.ids());
-    return ResponseEntity.ok().build();
+    return ResponseEntity.ok(ApiResponse.success());
   }
 }

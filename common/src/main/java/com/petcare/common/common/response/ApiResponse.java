@@ -20,4 +20,11 @@ public class ApiResponse implements Serializable {
     response.data = data;
     return response;
   }
+
+  public static ApiResponse success() {
+    ApiResponse response = new ApiResponse();
+    response.success = true;
+    response.errorMessage = StringUtils.EMPTY_STRING;
+    return response;
+  }
 }

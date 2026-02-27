@@ -2,6 +2,7 @@ package com.petcare.admin.zone.controller;
 
 import com.petcare.admin.zone.application.IndexAllZonesUseCase;
 import com.petcare.admin.zone.application.IndexOneZoneUseCase;
+import com.petcare.common.common.response.ApiResponse;
 import lombok.AllArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -18,14 +19,14 @@ public class ZoneIndexingController {
   private final IndexOneZoneUseCase indexOneZoneUseCase;
 
   @PostMapping
-  public ResponseEntity<Void> indexAll() {
+  public ResponseEntity<ApiResponse> indexAll() {
     indexAllZonesUseCase.execute();
-    return ResponseEntity.ok().build();
+    return ResponseEntity.ok(ApiResponse.success());
   }
 
   @PostMapping("{id}")
-  public ResponseEntity<Void> indexOneZone(@PathVariable("id") Long id) {
+  public ResponseEntity<ApiResponse> indexOneZone(@PathVariable("id") Long id) {
     indexOneZoneUseCase.execute(id);
-    return ResponseEntity.ok().build();
+    return ResponseEntity.ok(ApiResponse.success());
   }
 }

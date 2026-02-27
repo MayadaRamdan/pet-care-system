@@ -33,15 +33,15 @@ public class ItemController {
   private final SyncItemVariationsUseCase syncItemVariationsUseCase;
 
   @PostMapping
-  public ResponseEntity<Void> createItem(@RequestBody ItemDetailsDto request) {
+  public ResponseEntity<ApiResponse> createItem(@RequestBody ItemDetailsDto request) {
     createItemUseCase.execute(request);
-    return ResponseEntity.ok().build();
+    return ResponseEntity.ok(ApiResponse.success());
   }
 
   @PutMapping
-  public ResponseEntity<Void> updateItem(@RequestBody ItemDetailsDto request) {
+  public ResponseEntity<ApiResponse> updateItem(@RequestBody ItemDetailsDto request) {
     updateItemUseCase.execute(request);
-    return ResponseEntity.ok().build();
+    return ResponseEntity.ok(ApiResponse.success());
   }
 
   @GetMapping("/{id}")
@@ -50,18 +50,18 @@ public class ItemController {
   }
 
   @PostMapping("/{id}/assets")
-  public ResponseEntity<Void> uploadThumbnail(
+  public ResponseEntity<ApiResponse> uploadThumbnail(
       @PathVariable(name = "id") Long itemId,
       @RequestParam(name = "file", required = false) MultipartFile file)
       throws IOException {
     updateItemThumbnailUseCase.execute(itemId, file);
-    return ResponseEntity.ok().build();
+    return ResponseEntity.ok(ApiResponse.success());
   }
 
   @PutMapping("/{id}/variations")
-  public ResponseEntity<Void> updateItemVariations(
+  public ResponseEntity<ApiResponse> updateItemVariations(
       @PathVariable(name = "id") Long itemId, @RequestBody ItemVariations request) {
     syncItemVariationsUseCase.execute(itemId, request.variations());
-    return ResponseEntity.ok().build();
+    return ResponseEntity.ok(ApiResponse.success());
   }
 }

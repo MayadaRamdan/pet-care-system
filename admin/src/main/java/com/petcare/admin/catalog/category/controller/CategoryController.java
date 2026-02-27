@@ -36,9 +36,9 @@ public class CategoryController {
   private final BuildCategoryAncestorDescendantUseCase buildAncestorDescendantUseCase;
 
   @PostMapping
-  public ResponseEntity<Void> createCategory(@RequestBody CreateCategoryRequest request) {
+  public ResponseEntity<ApiResponse> createCategory(@RequestBody CreateCategoryRequest request) {
     createCategoryUseCase.execute(request);
-    return ResponseEntity.ok().build();
+    return ResponseEntity.ok(ApiResponse.success());
   }
 
   @GetMapping
@@ -60,23 +60,23 @@ public class CategoryController {
   }
 
   @PostMapping("/{id}/assets")
-  public ResponseEntity<Void> uploadThumbnail(
+  public ResponseEntity<ApiResponse> uploadThumbnail(
       @PathVariable(name = "id") Long categoryId,
       @RequestParam(name = "file", required = false) MultipartFile file)
       throws IOException {
     updateCategoryThumbnailUseCase.execute(categoryId, file);
-    return ResponseEntity.ok().build();
+    return ResponseEntity.ok(ApiResponse.success());
   }
 
   @PutMapping("/categories-paths")
-  public ResponseEntity<Void> updateCategoriesPaths() {
+  public ResponseEntity<ApiResponse> updateCategoriesPaths() {
     updateCategoriesPathsUseCase.execute();
-    return ResponseEntity.ok().build();
+    return ResponseEntity.ok(ApiResponse.success());
   }
 
   @PostMapping("/ancestors-and-descendants")
-  public ResponseEntity<Void> buildCategoryDescendant() {
+  public ResponseEntity<ApiResponse> buildCategoryDescendant() {
     buildAncestorDescendantUseCase.execute();
-    return ResponseEntity.ok().build();
+    return ResponseEntity.ok(ApiResponse.success());
   }
 }
