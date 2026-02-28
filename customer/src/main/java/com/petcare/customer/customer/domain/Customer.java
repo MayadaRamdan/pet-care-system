@@ -19,16 +19,13 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import static com.petcare.common.common.utils.StringUtils.EMPTY_STRING;
-
 @Getter
 @Setter
 @Entity
 @Table(
     name = "customer",
     indexes = {
-      @Index(name = "idx_email", columnList = "email"),
-      @Index(name = "idx_username", columnList = "username")
+      @Index(name = "idx_email", columnList = "email")
     })
 @Builder
 @NoArgsConstructor
