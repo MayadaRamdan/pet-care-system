@@ -40,7 +40,6 @@ public class UserController {
     return ResponseEntity.ok(
         Map.of(
             "id", user.getId(),
-            "username", user.getUsername(),
             "email", user.getEmail(),
             "fullName", user.getFullName() != null ? user.getFullName() : "",
             "avatarUrl", user.getAvatarUrl() != null ? user.getAvatarUrl() : "",

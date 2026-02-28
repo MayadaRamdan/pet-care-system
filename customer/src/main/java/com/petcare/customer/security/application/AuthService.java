@@ -11,7 +11,6 @@ import com.petcare.customer.redis.application.RefreshTokenService;
 import com.petcare.customer.redis.domain.RefreshToken;
 import com.petcare.customer.security.dto.AuthResponse;
 import com.petcare.customer.security.dto.UserInfo;
-import com.petcare.customer.security.utils.JwtUtil;
 import com.petcare.customer.utils.HttpServletRequestUtils;
 import jakarta.servlet.http.HttpServletRequest;
 import java.time.Instant;
@@ -33,7 +32,7 @@ public class AuthService {
 
   private final CustomerRepository userRepository;
   private final PasswordEncoder passwordEncoder;
-  private final JwtUtil jwtUtil;
+  private final JwtService jwtService;
   private final RefreshTokenService refreshTokenService;
   private final AuthenticationManager authenticationManager;
 
@@ -52,7 +51,7 @@ public class AuthService {
     // Get user
     Customer user =
         userRepository
-            .findByUsername(request.username())
+            .findByEmail(request.username())
             .orElseThrow(() -> new ResourceNotFoundException("User not found"));
 
     // Update last login
@@ -60,14 +59,14 @@ public class AuthService {
     userRepository.save(user);
 
     // Generate tokens
-    String accessToken = jwtUtil.generateAccessToken(user);
+    String accessToken = jwtService.generateAccessToken(user);
     RefreshToken refreshToken =
         refreshTokenService.createRefreshToken(
             user.getId(),
             HttpServletRequestUtils.getDeviceInfo(httpRequest),
             HttpServletRequestUtils.getClientIp(httpRequest));
 
-    log.info("User logged in successfully: {}", user.getUsername());
+    log.info("User logged in successfully: {}", user.getEmail());
 
     return buildAuthResponse(accessToken, refreshToken.getToken(), user);
   }
@@ -75,7 +74,7 @@ public class AuthService {
   @Transactional
   public AuthResponse register(RegisterRequest request) {
     // Check if username exists
-    if (userRepository.existsByUsername(request.username())) {
+    if (userRepository.existsByEmail(request.email())) {
       throw new BadRequestException("Username is already taken");
     }
 
@@ -86,7 +85,6 @@ public class AuthService {
 
     // Create user (NO ROLES!)
     Customer user = new Customer();
-    user.setUsername(request.username());
     user.setEmail(request.email());
     user.setPassword(passwordEncoder.encode(request.password()));
     user.setFullName(request.fullName());
@@ -96,10 +94,10 @@ public class AuthService {
 
     user = userRepository.save(user);
 
-    log.info("New customer registered: {}", user.getUsername());
+    log.info("New customer registered: {}", user.getEmail());
 
     // Auto-login after registration
-    String accessToken = jwtUtil.generateAccessToken(user);
+    String accessToken = jwtService.generateAccessToken(user);
     RefreshToken refreshToken =
         refreshTokenService.createRefreshToken(user.getId(), "registration", "system");
 
@@ -124,14 +122,14 @@ public class AuthService {
     refreshTokenService.deleteByToken(request.refreshToken());
 
     // Generate new tokens
-    String accessToken = jwtUtil.generateAccessToken(user);
+    String accessToken = jwtService.generateAccessToken(user);
     RefreshToken newRefreshToken =
         refreshTokenService.createRefreshToken(
             user.getId(),
             HttpServletRequestUtils.getDeviceInfo(httpRequest),
             HttpServletRequestUtils.getClientIp(httpRequest));
 
-    log.info("Token refreshed for user: {}", user.getUsername());
+    log.info("Token refreshed for user: {}", user.getEmail());
 
     return buildAuthResponse(accessToken, newRefreshToken.getToken(), user);
   }
@@ -156,11 +154,6 @@ public class AuthService {
         refreshToken,
         "Bearer",
         accessTokenExpiration / 1000, // Convert to seconds
-        new UserInfo(
-            user.getId(),
-            user.getUsername(),
-            user.getEmail(),
-            user.getFullName(),
-            user.getAvatarUrl()));
+        new UserInfo(user.getId(), user.getEmail(), user.getFullName(), user.getAvatarUrl()));
   }
 }

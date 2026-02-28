@@ -1,6 +1,6 @@
-package com.petcare.customer.security.domain;
+package com.petcare.admin.security.domain;
 
-import com.petcare.customer.customer.domain.Customer;
+import com.petcare.admin.staffuser.domain.StaffUser;
 import java.util.Collection;
 import java.util.Collections;
 import lombok.AllArgsConstructor;
@@ -11,9 +11,9 @@ import org.springframework.security.core.userdetails.UserDetails;
 
 @AllArgsConstructor
 @Getter
-public class CustomerPrincipal implements UserDetails {
+public class StaffUserPrincipal implements UserDetails {
 
-  private final Customer customer;
+  private final StaffUser user;
 
   @Override
   public Collection<? extends GrantedAuthority> getAuthorities() {
@@ -23,22 +23,22 @@ public class CustomerPrincipal implements UserDetails {
 
   @Override
   public String getPassword() {
-    return customer.getPassword();
+    return user.getPassword();
   }
 
   @Override
   public String getUsername() {
-    return customer.getEmail();
+    return user.getEmail();
   }
 
   @Override
   public boolean isAccountNonExpired() {
-    return !customer.isDeleted();
+    return !user.isDeleted();
   }
 
   @Override
   public boolean isAccountNonLocked() {
-    return !customer.isDeleted();
+    return !user.isDeleted();
   }
 
   @Override
@@ -48,10 +48,10 @@ public class CustomerPrincipal implements UserDetails {
 
   @Override
   public boolean isEnabled() {
-    return customer.isActive();
+    return user.isActive();
   }
 
   public Long getId() {
-    return customer.getId();
+    return user.getId();
   }
 }

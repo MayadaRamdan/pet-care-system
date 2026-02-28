@@ -1,4 +1,4 @@
-package com.petcare.customer.security.utils;
+package com.petcare.customer.security.application;
 
 import com.petcare.customer.customer.domain.Customer;
 import io.jsonwebtoken.*;
@@ -17,7 +17,7 @@ import org.springframework.stereotype.Component;
 @Slf4j
 @Component
 @RequiredArgsConstructor
-public class JwtUtil {
+public class JwtService {
 
   @Value("${jwt.secret}")
   private String secret;
@@ -38,20 +38,12 @@ public class JwtUtil {
     claims.put("email", customer.getEmail());
 
     return Jwts.builder()
-        .subject(customer.getUsername())
+        .subject(customer.getEmail())
         .claims(claims)
         .issuedAt(new Date())
         .expiration(new Date(System.currentTimeMillis() + accessTokenExpiration))
         .signWith(key)
         .compact();
-  }
-
-  public String getUsernameFromToken(String token) {
-    return getClaimsFromToken(token).getSubject();
-  }
-
-  public Long getCustomerIdFromToken(String token) {
-    return getClaimsFromToken(token).get("userId", Long.class);
   }
 
   public boolean validateToken(String token) {
@@ -64,7 +56,8 @@ public class JwtUtil {
     }
   }
 
-  private Claims getClaimsFromToken(String token) {
-    return Jwts.parser().verifyWith(key).build().parseSignedClaims(token).getPayload();
+  public Long getUserIdFromToken(String token) {
+    Claims claims = Jwts.parser().verifyWith(key).build().parseSignedClaims(token).getPayload();
+    return claims.get("userId", Long.class);
   }
 }

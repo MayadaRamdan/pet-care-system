@@ -1,8 +1,8 @@
-package com.petcare.customer.security.application;
+package com.petcare.admin.security.application;
 
-import com.petcare.customer.customer.domain.Customer;
-import com.petcare.customer.customer.repository.CustomerRepository;
-import com.petcare.customer.security.domain.CustomerPrincipal;
+import com.petcare.admin.security.domain.StaffUserPrincipal;
+import com.petcare.admin.staffuser.domain.StaffUser;
+import com.petcare.admin.staffuser.repository.StaffUserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -12,28 +12,28 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
-public class CustomUserDetailsService implements UserDetailsService {
+public class StaffUserDetailsService implements UserDetailsService {
 
-  private final CustomerRepository userRepository;
+  private final StaffUserRepository userRepository;
 
   @Override
   @Transactional(readOnly = true)
   public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-    Customer user =
+    StaffUser user =
         userRepository
-            .findByEmail(username)
+            .findByUsername(username)
             .orElseThrow(() -> new UsernameNotFoundException("User not found: " + username));
 
-    return new CustomerPrincipal(user);
+    return new StaffUserPrincipal(user);
   }
 
   @Transactional(readOnly = true)
   public UserDetails loadUserById(Long id) {
-    Customer user =
+    StaffUser user =
         userRepository
             .findById(id)
             .orElseThrow(() -> new UsernameNotFoundException("User not found with id: " + id));
 
-    return new CustomerPrincipal(user);
+    return new StaffUserPrincipal(user);
   }
 }

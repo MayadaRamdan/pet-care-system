@@ -34,8 +34,6 @@ public class Customer extends Auditable {
   private Long id;
 
   @Column(unique = true, nullable = false, length = 100)
-  private String username;
-
   private String email;
 
   private String password;
