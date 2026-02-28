@@ -1,6 +1,6 @@
 package com.petcare.customer.security.config;
 
-import com.petcare.customer.security.application.CustomUserDetailsService;
+import com.petcare.customer.security.application.CustomerDetailsService;
 import com.petcare.customer.security.filters.JwtAuthenticationFilter;
 import java.util.Arrays;
 import java.util.List;
@@ -31,7 +31,7 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 @RequiredArgsConstructor
 public class SecurityConfig {
 
-  private final CustomUserDetailsService userDetailsService;
+  private final CustomerDetailsService userDetailsService;
   private final JwtAuthenticationFilter jwtAuthenticationFilter;
 
   @Value("${app.cors.allowed-origins}")

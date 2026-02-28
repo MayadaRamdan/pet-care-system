@@ -1,10 +1,10 @@
 package com.petcare.customer.security.application;
 
-import com.petcare.common.exception.domain.ResourceNotFoundException;
+
 import com.petcare.common.security.domain.DeviceTrackingInfo;
 import com.petcare.common.security.dto.LoginRequest;
 import com.petcare.customer.customer.domain.Customer;
-import com.petcare.customer.customer.repository.CustomerRepository;
+import com.petcare.customer.security.domain.CustomerPrincipal;
 import com.petcare.customer.security.dto.AuthResponse;
 import com.petcare.customer.security.dto.UserInfo;
 import java.time.Instant;
@@ -23,7 +23,7 @@ import org.springframework.transaction.annotation.Transactional;
 @AllArgsConstructor
 public class CustomerLoginUseCase {
 
-  private final CustomerRepository userRepository;
+  private final CustomerDetailsService customerDetailsService;
   private final JwtService jwtService;
   private final AuthenticationManager authenticationManager;
   private final CreateSecurityTokenUseCase createSecurityTokenUseCase;
@@ -38,27 +38,24 @@ public class CustomerLoginUseCase {
     SecurityContextHolder.getContext().setAuthentication(authentication);
 
     // Get user
-    Customer user =
-        userRepository
-            .findByEmail(request.username())
-            .orElseThrow(() -> new ResourceNotFoundException("User not found"));
+    Customer  customer =( (CustomerPrincipal)
+            customerDetailsService.loadUserByUsername(request.username())).getCustomer();
 
     // Update last login
-    user.setLastLogin(Instant.now());
-    userRepository.save(user);
+    customer.setLastLogin(Instant.now());
 
     // Generate tokens
     // Auto-login after registration
-    String accessToken = jwtService.generateAccessToken(user);
+    String accessToken = jwtService.generateAccessToken(customer);
 
     String refreshToken = UUID.randomUUID().toString();
 
-    createSecurityTokenUseCase.execute(user, accessToken, refreshToken, deviceTrackingInfo);
+    createSecurityTokenUseCase.execute(customer, accessToken, refreshToken, deviceTrackingInfo);
 
     return new AuthResponse(
         accessToken,
         refreshToken,
         "Bearer", // Convert to seconds
-        new UserInfo(user.getId(), user.getEmail(), user.getName(), user.getAvatarUrl()));
+        new UserInfo(customer.getId(), customer.getEmail(), customer.getName(), customer.getAvatarUrl()));
   }
 }

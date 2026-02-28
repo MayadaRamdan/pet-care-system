@@ -13,7 +13,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 @Getter
 public class CustomerPrincipal implements UserDetails {
 
-  private final Customer customer;
+  @Getter private final Customer customer;
 
   @Override
   public Collection<? extends GrantedAuthority> getAuthorities() {

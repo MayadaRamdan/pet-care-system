@@ -1,6 +1,6 @@
 package com.petcare.customer.security.filters;
 
-import com.petcare.customer.security.application.CustomUserDetailsService;
+import com.petcare.customer.security.application.CustomerDetailsService;
 import com.petcare.customer.security.application.JwtService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -24,7 +24,7 @@ import org.springframework.web.filter.OncePerRequestFilter;
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
   private final JwtService jwtService;
-  private final CustomUserDetailsService userDetailsService;
+  private final CustomerDetailsService userDetailsService;
 
   @Override
   protected void doFilterInternal(

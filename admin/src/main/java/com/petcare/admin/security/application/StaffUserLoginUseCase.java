@@ -1,15 +1,16 @@
 package com.petcare.admin.security.application;
 
+import com.petcare.admin.security.domain.StaffUserPrincipal;
 import com.petcare.admin.security.domain.StaffUserRole;
 import com.petcare.admin.security.dto.AuthResponse;
 import com.petcare.admin.security.dto.StaffUserInfo;
 import com.petcare.admin.staffuser.domain.StaffUser;
-import com.petcare.admin.staffuser.repository.StaffUserRepository;
 import com.petcare.common.security.domain.DeviceTrackingInfo;
 import com.petcare.common.security.dto.LoginRequest;
 import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -20,14 +21,15 @@ import org.springframework.transaction.annotation.Transactional;
 @AllArgsConstructor
 public class StaffUserLoginUseCase {
 
-  private final StaffUserRepository userRepo;
+  private final StaffUserDetailsService userDetailsService;
   private final JwtService jwtService;
   private final PasswordEncoder encoder;
   private final CreateSecurityTokenUseCase createSecurityTokenUseCase;
 
   public AuthResponse execute(LoginRequest request, DeviceTrackingInfo deviceTrackingInfo) {
 
-    StaffUser staffUser = userRepo.findByUsername(request.username()).orElseThrow();
+    UserDetails userDetails = userDetailsService.loadUserByUsername(request.username());
+    StaffUser staffUser = ((StaffUserPrincipal) userDetails).getUser();
 
     if (!encoder.matches(request.password(), staffUser.getPassword()))
       throw new RuntimeException("Invalid password");

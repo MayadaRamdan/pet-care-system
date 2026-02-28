@@ -4,6 +4,8 @@ server:
     context-path: /customer
 
 spring:
+  profiles:
+    active: local
   application:
     name: customer
   threads:
@@ -24,10 +26,11 @@ spring:
     hibernate:
       ddl-auto: update
     show-sql: true
+    open-in-view: false
     properties:
       hibernate:
-        dialect: org.hibernate.dialect.MariaDBDialect
         format_sql: true
+        # dialect: org.hibernate.dialect.MariaDBDialect #it is MariaDBDialect by default
 
   # Redis
   data:
@@ -64,5 +67,5 @@ app:
 springdoc:
   swagger-ui:
     path: /docs # Change swagger UI path
-    enabled: true # Disable swagger in production
+    enabled: false # Disable swagger in production
     operationsSorter: method # Sort endpoints
