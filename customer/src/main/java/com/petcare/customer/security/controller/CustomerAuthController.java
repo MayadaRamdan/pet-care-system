@@ -1,9 +1,11 @@
 package com.petcare.customer.security.controller;
 
 import com.petcare.common.security.dto.LoginRequest;
-import com.petcare.customer.security.dto.CustomerRegisterRequest;
-import com.petcare.customer.security.application.AuthService;
+import com.petcare.customer.security.application.CustomerLoginUseCase;
+import com.petcare.customer.security.application.RegisterCustomerUseCase;
 import com.petcare.customer.security.dto.AuthResponse;
+import com.petcare.customer.security.dto.CustomerRegisterRequest;
+import com.petcare.customer.utils.HttpServletRequestUtils;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
@@ -17,14 +19,18 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/api/auth")
 @AllArgsConstructor
-public class AuthController {
+public class CustomerAuthController {
 
-  private final AuthService authService;
+  private final RegisterCustomerUseCase registerCustomerUseCase;
+  private final CustomerLoginUseCase customerLoginUseCase;
 
   @PostMapping("/register")
-  public ResponseEntity<AuthResponse> register(@Valid @RequestBody CustomerRegisterRequest request) {
+  public ResponseEntity<AuthResponse> register(
+      @Valid @RequestBody CustomerRegisterRequest request, HttpServletRequest httpRequest) {
     System.out.println("🎯 Register endpoint hit!");
-    AuthResponse response = authService.register(request);
+    AuthResponse response =
+        registerCustomerUseCase.execute(
+            request, HttpServletRequestUtils.getDeviceTrackingInfo(httpRequest));
     return ResponseEntity.status(HttpStatus.CREATED).body(response);
   }
 
@@ -33,7 +39,9 @@ public class AuthController {
       @Valid @RequestBody LoginRequest request, HttpServletRequest httpRequest) {
 
     System.out.println("🔐 Login endpoint hit!");
-    AuthResponse response = authService.login(request, httpRequest);
+    AuthResponse response =
+        customerLoginUseCase.login(
+            request, HttpServletRequestUtils.getDeviceTrackingInfo(httpRequest));
     return ResponseEntity.ok(response);
   }
 }

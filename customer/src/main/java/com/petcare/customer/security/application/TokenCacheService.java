@@ -1,4 +1,4 @@
-package com.petcare.admin.security.application;
+package com.petcare.customer.security.application;
 
 import java.util.concurrent.TimeUnit;
 import lombok.RequiredArgsConstructor;
@@ -10,7 +10,7 @@ import org.springframework.stereotype.Service;
 public class TokenCacheService {
 
   private final RedisTemplate<String, String> redisTemplate;
-  private static final String PREFIX = "pc:cu-jwt:"; // petcare:staffUser-jwt:
+  private static final String PREFIX = "pc:c-jwt:"; // petcare:customer-jwt:
 
   // Cache token with TTL matching JWT expiry
   public void cacheToken(String token, Long userId, long ttlMillis) {
