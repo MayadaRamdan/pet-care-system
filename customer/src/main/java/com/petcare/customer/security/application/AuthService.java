@@ -4,7 +4,7 @@ import com.petcare.common.exception.domain.BadRequestException;
 import com.petcare.common.exception.domain.ResourceNotFoundException;
 import com.petcare.common.security.dto.LoginRequest;
 import com.petcare.customer.security.dto.RefreshTokenRequest;
-import com.petcare.customer.security.dto.RegisterRequest;
+import com.petcare.customer.security.dto.CustomerRegisterRequest;
 import com.petcare.customer.customer.domain.Customer;
 import com.petcare.customer.customer.repository.CustomerRepository;
 import com.petcare.customer.redis.application.RefreshTokenService;
@@ -72,7 +72,7 @@ public class AuthService {
   }
 
   @Transactional
-  public AuthResponse register(RegisterRequest request) {
+  public AuthResponse register(CustomerRegisterRequest request) {
     // Check if username exists
     if (userRepository.existsByEmail(request.email())) {
       throw new BadRequestException("Username is already taken");
@@ -87,7 +87,7 @@ public class AuthService {
     Customer user = new Customer();
     user.setEmail(request.email());
     user.setPassword(passwordEncoder.encode(request.password()));
-    user.setFullName(request.fullName());
+    user.setName(request.name());
     user.setActive(true);
     user.setDeleted(false);
     user.setEmailVerified(false);
@@ -154,6 +154,6 @@ public class AuthService {
         refreshToken,
         "Bearer",
         accessTokenExpiration / 1000, // Convert to seconds
-        new UserInfo(user.getId(), user.getEmail(), user.getFullName(), user.getAvatarUrl()));
+        new UserInfo(user.getId(), user.getEmail(), user.getName(), user.getAvatarUrl()));
   }
 }

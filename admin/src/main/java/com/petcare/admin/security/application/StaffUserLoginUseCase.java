@@ -2,7 +2,7 @@ package com.petcare.admin.security.application;
 
 import com.petcare.admin.security.domain.StaffUserRole;
 import com.petcare.admin.security.dto.AuthResponse;
-import com.petcare.admin.security.dto.UserInfo;
+import com.petcare.admin.security.dto.StaffUserInfo;
 import com.petcare.admin.staffuser.domain.StaffUser;
 import com.petcare.admin.staffuser.repository.StaffUserRepository;
 import com.petcare.common.security.domain.DeviceTrackingInfo;
@@ -38,8 +38,8 @@ public class StaffUserLoginUseCase {
     createSecurityTokenUseCase.execute(staffUser, accessToken, refreshToken, deviceTrackingInfo);
 
     StaffUserRole role = staffUser.getRole();
-    UserInfo userInfo =
-        new UserInfo(
+    StaffUserInfo staffUserInfo =
+        new StaffUserInfo(
             staffUser.getId(),
             staffUser.getUsername(),
             staffUser.getName(),
@@ -47,6 +47,6 @@ public class StaffUserLoginUseCase {
             role.getName(),
             role.getPermissions());
 
-    return new AuthResponse(accessToken, refreshToken, "Bearer", userInfo);
+    return new AuthResponse(accessToken, refreshToken, "Bearer", staffUserInfo);
   }
 }

@@ -2,6 +2,7 @@ package com.petcare.admin.staffuser.domain;
 
 import com.petcare.admin.security.domain.StaffUserRole;
 import com.petcare.common.common.domain.Auditable;
+import com.petcare.common.common.embeddable.Name;
 import com.petcare.common.common.embeddable.PhoneNumber;
 import jakarta.persistence.AttributeOverride;
 import jakarta.persistence.AttributeOverrides;
@@ -30,7 +31,12 @@ public class StaffUser extends Auditable {
   private String username;
   private String password;
 
-  private String name;
+  @Embedded
+  @AttributeOverrides({
+    @AttributeOverride(name = "first", column = @Column(name = "first_name")),
+    @AttributeOverride(name = "last", column = @Column(name = "last_name"))
+  })
+  private Name name;
 
   @Column(name = "code", unique = true)
   private String code;

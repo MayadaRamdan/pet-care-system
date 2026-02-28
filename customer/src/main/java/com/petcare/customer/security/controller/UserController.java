@@ -22,10 +22,7 @@ public class UserController {
             "id", userPrincipal.getId(),
             "username", userPrincipal.getUsername(),
             "email", userPrincipal.getCustomer().getEmail(),
-            "fullName",
-                userPrincipal.getCustomer().getFullName() != null
-                    ? userPrincipal.getCustomer().getFullName()
-                    : "",
+            "name", userPrincipal.getCustomer().getName(),
             "avatarUrl",
                 userPrincipal.getCustomer().getAvatarUrl() != null
                     ? userPrincipal.getCustomer().getAvatarUrl()
@@ -41,7 +38,7 @@ public class UserController {
         Map.of(
             "id", user.getId(),
             "email", user.getEmail(),
-            "fullName", user.getFullName() != null ? user.getFullName() : "",
+            "name", user.getName(),
             "avatarUrl", user.getAvatarUrl() != null ? user.getAvatarUrl() : "",
             //     "phoneNumber", user.getPhoneNumber() != null ? user.getPhoneNumber() : "",
             "emailVerified", user.isEmailVerified(),

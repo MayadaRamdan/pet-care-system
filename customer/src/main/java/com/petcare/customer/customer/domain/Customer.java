@@ -1,7 +1,11 @@
 package com.petcare.customer.customer.domain;
 
 import com.petcare.common.common.domain.Auditable;
+import com.petcare.common.common.embeddable.Name;
+import jakarta.persistence.AttributeOverride;
+import jakarta.persistence.AttributeOverrides;
 import jakarta.persistence.Column;
+import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -14,6 +18,8 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+
+import static com.petcare.common.common.utils.StringUtils.EMPTY_STRING;
 
 @Getter
 @Setter
@@ -38,7 +44,12 @@ public class Customer extends Auditable {
 
   private String password;
 
-  private String fullName;
+  @Embedded
+  @AttributeOverrides({
+    @AttributeOverride(name = "first", column = @Column(name = "first_name")),
+    @AttributeOverride(name = "last", column = @Column(name = "last_name"))
+  })
+  private Name name;
 
   @Column(name = "avatar_url", length = 500)
   private String avatarUrl;

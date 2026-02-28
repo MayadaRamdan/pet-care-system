@@ -1,7 +1,7 @@
 package com.petcare.customer.security.controller;
 
 import com.petcare.common.security.dto.LoginRequest;
-import com.petcare.customer.security.dto.RegisterRequest;
+import com.petcare.customer.security.dto.CustomerRegisterRequest;
 import com.petcare.customer.security.application.AuthService;
 import com.petcare.customer.security.dto.AuthResponse;
 import jakarta.servlet.http.HttpServletRequest;
@@ -22,7 +22,7 @@ public class AuthController {
   private final AuthService authService;
 
   @PostMapping("/register")
-  public ResponseEntity<AuthResponse> register(@Valid @RequestBody RegisterRequest request) {
+  public ResponseEntity<AuthResponse> register(@Valid @RequestBody CustomerRegisterRequest request) {
     System.out.println("🎯 Register endpoint hit!");
     AuthResponse response = authService.register(request);
     return ResponseEntity.status(HttpStatus.CREATED).body(response);

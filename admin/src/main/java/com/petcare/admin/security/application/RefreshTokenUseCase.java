@@ -3,7 +3,7 @@ package com.petcare.admin.security.application;
 import com.petcare.admin.security.domain.SecurityToken;
 import com.petcare.admin.security.domain.StaffUserRole;
 import com.petcare.admin.security.dto.AuthResponse;
-import com.petcare.admin.security.dto.UserInfo;
+import com.petcare.admin.security.dto.StaffUserInfo;
 import com.petcare.admin.security.repository.SecurityTokenRepository;
 import com.petcare.admin.staffuser.domain.StaffUser;
 import java.time.Instant;
@@ -50,8 +50,8 @@ public class RefreshTokenUseCase {
 
     StaffUserRole role = staffUser.getRole();
 
-    UserInfo userInfo =
-        new UserInfo(
+    StaffUserInfo staffUserInfo =
+        new StaffUserInfo(
             staffUser.getId(),
             staffUser.getUsername(),
             staffUser.getName(),
@@ -59,6 +59,6 @@ public class RefreshTokenUseCase {
             role.getName(),
             role.getPermissions());
 
-    return new AuthResponse(securityToken.getAccessToken(), refreshToken, "Bearer", userInfo);
+    return new AuthResponse(securityToken.getAccessToken(), refreshToken, "Bearer", staffUserInfo);
   }
 }

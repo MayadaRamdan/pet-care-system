@@ -4,4 +4,4 @@ public record AuthResponse(
     String accessToken,
     String refreshToken,
     String tokenType,
-    UserInfo user) {}
+    StaffUserInfo user) {}
