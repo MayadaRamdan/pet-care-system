@@ -1,3 +1,3 @@
-package com.petcare.common.security.dto;
+package com.petcare.customer.security.dto;
 
 public record RefreshTokenRequest(String refreshToken) {}

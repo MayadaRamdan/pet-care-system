@@ -10,36 +10,44 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
-
 import java.time.Instant;
-import java.time.LocalDateTime;
 import lombok.Getter;
 import lombok.Setter;
 
 @Getter
 @Setter
 @Entity
-@Table(name = "staff_user_refresh_tokens")
-public class RefreshToken {
+@Table(name = "staff_user_security_tokens")
+public class SecurityToken {
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
-
-  @Column(unique = true, nullable = false)
-  private String token; // UUID
 
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "staff_user_id", nullable = false)
   private StaffUser staffUser;
 
   private String deviceInfo; // User-Agent or device identifier
-
   private String ipAddress;
 
-  private LocalDateTime createdAt;
+  @Column(unique = true, nullable = false)
+  private String accessToken;
 
-  private Instant expiryDate;
+  private Instant accessTokenCreatedAt;
+  private Instant accessTokenExpiresAt;
+
+  @Column(unique = true, nullable = false)
+  private String refreshToken; // UUID
+
+  private Instant refreshTokenCreatedAt;
+  private Instant refreshTokenExpiresAt;
 
   private boolean revoked;
+
+  public SecurityToken() {
+    accessTokenCreatedAt = Instant.now();
+    refreshTokenCreatedAt = Instant.now();
+    revoked = false;
+  }
 }

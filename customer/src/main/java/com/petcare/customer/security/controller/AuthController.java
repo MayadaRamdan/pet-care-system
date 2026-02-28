@@ -1,7 +1,7 @@
 package com.petcare.customer.security.controller;
 
 import com.petcare.common.security.dto.LoginRequest;
-import com.petcare.common.security.dto.RegisterRequest;
+import com.petcare.customer.security.dto.RegisterRequest;
 import com.petcare.customer.security.application.AuthService;
 import com.petcare.customer.security.dto.AuthResponse;
 import jakarta.servlet.http.HttpServletRequest;

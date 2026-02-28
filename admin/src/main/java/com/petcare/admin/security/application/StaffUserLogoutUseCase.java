@@ -1,9 +1,8 @@
 package com.petcare.admin.security.application;
 
-import com.petcare.admin.security.repository.RefreshTokenRepository;
+import com.petcare.admin.security.repository.SecurityTokenRepository;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -13,11 +12,11 @@ import org.springframework.transaction.annotation.Transactional;
 @AllArgsConstructor
 public class StaffUserLogoutUseCase {
 
-  private final RefreshTokenRepository refreshTokenRepository;
-  private final RedisTemplate<String, String> redisTemplate;
+  private final SecurityTokenRepository securityTokenRepository;
+  private final TokenCacheService tokenCacheService;
 
-  public void execute(String refreshToken) {
-    refreshTokenRepository.revoke(refreshToken);
-    redisTemplate.delete("refresh:" + refreshToken);
+  public void execute(String accessToken) {
+    securityTokenRepository.revoke(accessToken);
+    tokenCacheService.evictToken(accessToken);
   }
 }

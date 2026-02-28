@@ -6,6 +6,7 @@ import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
 import jakarta.annotation.PostConstruct;
+import jakarta.servlet.http.HttpServletRequest;
 import java.nio.charset.StandardCharsets;
 import java.util.Date;
 import java.util.HashMap;
@@ -14,6 +15,7 @@ import javax.crypto.SecretKey;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
 @Slf4j
 @Service
@@ -63,5 +65,13 @@ public class JwtService {
   public Long getUserIdFromToken(String token) {
     Claims claims = Jwts.parser().verifyWith(key).build().parseSignedClaims(token).getPayload();
     return claims.get("userId", Long.class);
+  }
+
+  public String getJwtFromRequest(HttpServletRequest request) {
+    String bearerToken = request.getHeader("Authorization");
+    if (StringUtils.hasText(bearerToken) && bearerToken.startsWith("Bearer ")) {
+      return bearerToken.substring(7);
+    }
+    return null;
   }
 }
