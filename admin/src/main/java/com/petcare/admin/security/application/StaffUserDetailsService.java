@@ -23,7 +23,6 @@ public class StaffUserDetailsService implements UserDetailsService {
         userRepository
             .findByUsername(username)
             .orElseThrow(() -> new UsernameNotFoundException("User not found: " + username));
-
     return new StaffUserPrincipal(user);
   }
 
@@ -33,7 +32,6 @@ public class StaffUserDetailsService implements UserDetailsService {
         userRepository
             .findById(id)
             .orElseThrow(() -> new UsernameNotFoundException("User not found with id: " + id));
-
     return new StaffUserPrincipal(user);
   }
 }

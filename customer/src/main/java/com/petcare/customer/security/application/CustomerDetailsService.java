@@ -23,7 +23,6 @@ public class CustomerDetailsService implements UserDetailsService {
         userRepository
             .findByEmail(username)
             .orElseThrow(() -> new UsernameNotFoundException("User not found: " + username));
-
     return new CustomerPrincipal(user);
   }
 
@@ -33,7 +32,6 @@ public class CustomerDetailsService implements UserDetailsService {
         userRepository
             .findById(id)
             .orElseThrow(() -> new UsernameNotFoundException("User not found with id: " + id));
-
     return new CustomerPrincipal(user);
   }
 }

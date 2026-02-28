@@ -4,7 +4,7 @@ package com.petcare.customer.security.application;
 import com.petcare.common.security.domain.DeviceTrackingInfo;
 import com.petcare.common.security.dto.LoginRequest;
 import com.petcare.customer.customer.domain.Customer;
-import com.petcare.customer.security.domain.CustomerPrincipal;
+import com.petcare.customer.customer.repository.CustomerRepository;
 import com.petcare.customer.security.dto.AuthResponse;
 import com.petcare.customer.security.dto.UserInfo;
 import java.time.Instant;
@@ -15,6 +15,7 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -23,7 +24,7 @@ import org.springframework.transaction.annotation.Transactional;
 @AllArgsConstructor
 public class CustomerLoginUseCase {
 
-  private final CustomerDetailsService customerDetailsService;
+  private final CustomerRepository customerRepository;
   private final JwtService jwtService;
   private final AuthenticationManager authenticationManager;
   private final CreateSecurityTokenUseCase createSecurityTokenUseCase;
@@ -38,8 +39,9 @@ public class CustomerLoginUseCase {
     SecurityContextHolder.getContext().setAuthentication(authentication);
 
     // Get user
-    Customer  customer =( (CustomerPrincipal)
-            customerDetailsService.loadUserByUsername(request.username())).getCustomer();
+    Customer  customer =
+            customerRepository.findByEmail(request.username())
+    .orElseThrow(() -> new UsernameNotFoundException("User not found: " + request.username()));
 
     // Update last login
     customer.setLastLogin(Instant.now());
