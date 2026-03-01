@@ -1,7 +1,8 @@
-package com.petcare.admin.security.application;
+package com.petcare.customer.security.application.actions;
 
-import com.petcare.admin.security.repository.SecurityTokenRepository;
-import com.petcare.admin.staffuser.domain.StaffUser;
+import com.petcare.customer.customer.domain.Customer;
+import com.petcare.customer.security.application.GetCurrentLoggedInCustomerUseCase;
+import com.petcare.customer.security.repository.SecurityTokenRepository;
 import java.time.Instant;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -12,13 +13,13 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 @Transactional
 @AllArgsConstructor
-public class StaffUserLogoutAllDevicesUseCase {
+public class CustomerLogoutAllDevicesUseCase {
 
   private final SecurityTokenRepository securityTokenRepository;
-  private final GetCurrentLoggedInStaffUserUseCase getCurrentLoggedInStaffUserUseCase;
+  private final GetCurrentLoggedInCustomerUseCase getCurrentLoggedInCustomerUseCase;
 
   public void execute() {
-    StaffUser loggedInUser = getCurrentLoggedInStaffUserUseCase.execute();
+    Customer loggedInUser = getCurrentLoggedInCustomerUseCase.execute();
     if (loggedInUser == null) {
       return;
     }

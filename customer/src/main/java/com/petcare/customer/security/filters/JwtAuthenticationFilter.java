@@ -1,6 +1,6 @@
 package com.petcare.customer.security.filters;
 
-import com.petcare.customer.security.application.AccessTokenValidator;
+import com.petcare.customer.security.application.jwt.AccessTokenValidator;
 import com.petcare.customer.security.domain.CustomerPrincipal;
 import com.petcare.customer.security.domain.SecurityToken;
 import com.petcare.customer.security.repository.SecurityTokenRepository;

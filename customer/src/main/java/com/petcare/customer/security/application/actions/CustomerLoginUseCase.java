@@ -1,9 +1,10 @@
-package com.petcare.customer.security.application;
+package com.petcare.customer.security.application.actions;
 
 import com.petcare.common.security.domain.DeviceTrackingInfo;
 import com.petcare.common.security.dto.LoginRequest;
 import com.petcare.customer.customer.domain.Customer;
 import com.petcare.customer.customer.repository.CustomerRepository;
+import com.petcare.customer.security.application.jwt.GenerateAccessTokenUseCase;
 import com.petcare.customer.security.dto.AuthResponse;
 import com.petcare.customer.security.dto.UserInfo;
 import java.time.Instant;

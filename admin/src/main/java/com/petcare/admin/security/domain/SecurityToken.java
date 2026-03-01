@@ -34,6 +34,7 @@ public class SecurityToken {
   private String ipAddress;
 
   private boolean revoked;
+  private Instant revokedAt;
 
   public SecurityToken() {
     accessTokenCreatedAt = Instant.now();

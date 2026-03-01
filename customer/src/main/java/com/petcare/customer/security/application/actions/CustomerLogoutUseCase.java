@@ -1,6 +1,6 @@
-package com.petcare.admin.security.application;
+package com.petcare.customer.security.application.actions;
 
-import com.petcare.admin.security.repository.SecurityTokenRepository;
+import com.petcare.customer.security.repository.SecurityTokenRepository;
 import java.time.Instant;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -11,7 +11,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 @Transactional
 @AllArgsConstructor
-public class StaffUserLogoutUseCase {
+public class CustomerLogoutUseCase {
 
   private final SecurityTokenRepository securityTokenRepository;
 

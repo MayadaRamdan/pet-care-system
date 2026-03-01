@@ -1,7 +1,8 @@
-package com.petcare.customer.security.application;
+package com.petcare.customer.security.application.jwt;
 
 import com.petcare.common.security.domain.DeviceTrackingInfo;
 import com.petcare.customer.customer.domain.Customer;
+import com.petcare.customer.security.application.CreateSecurityTokenUseCase;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
 import jakarta.annotation.PostConstruct;

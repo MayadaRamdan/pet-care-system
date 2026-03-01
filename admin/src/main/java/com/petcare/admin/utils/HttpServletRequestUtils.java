@@ -1,5 +1,7 @@
 package com.petcare.admin.utils;
 
+import static com.petcare.common.common.utils.StringUtils.COMMA_CHAR;
+
 import com.petcare.common.security.domain.DeviceTrackingInfo;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.util.StringUtils;
@@ -22,7 +24,7 @@ public class HttpServletRequestUtils {
   private static String getClientIp(HttpServletRequest request) {
     String xForwardedFor = request.getHeader("X-Forwarded-For");
     if (xForwardedFor != null && !xForwardedFor.isEmpty()) {
-      return xForwardedFor.split(",")[0].trim();
+      return xForwardedFor.split(COMMA_CHAR)[0].trim();
     }
     return request.getRemoteAddr();
   }

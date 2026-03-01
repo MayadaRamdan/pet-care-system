@@ -1,4 +1,4 @@
-package com.petcare.customer.security.application;
+package com.petcare.customer.security.application.jwt;
 
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
