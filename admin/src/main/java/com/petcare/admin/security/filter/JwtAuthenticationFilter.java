@@ -1,7 +1,10 @@
 package com.petcare.admin.security.filter;
 
+
 import com.petcare.admin.security.application.JwtService;
-import com.petcare.admin.security.application.StaffUserDetailsService;
+import com.petcare.admin.security.domain.SecurityToken;
+import com.petcare.admin.security.domain.StaffUserPrincipal;
+import com.petcare.admin.security.repository.SecurityTokenRepository;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -24,7 +27,7 @@ import org.springframework.web.filter.OncePerRequestFilter;
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
   private final JwtService jwtService;
-  private final StaffUserDetailsService userDetailsService;
+  private final SecurityTokenRepository tokenRepository;
 
   @Override
   protected void doFilterInternal(
@@ -34,20 +37,22 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
       throws ServletException, IOException {
 
     try {
-      String jwt = jwtService.getJwtFromRequest(request);
+      String tokenId = jwtService.getJwtFromRequest(request);
+      SecurityToken securityToken = tokenRepository.fetchFullAccessToken(tokenId).orElseThrow();
+
+      String jwt = securityToken.getAccessToken();
 
       if (StringUtils.hasText(jwt) && jwtService.validateToken(jwt)) {
-        Long userId = jwtService.getUserIdFromToken(jwt);
-        UserDetails userDetails = userDetailsService.loadUserById(userId);
+
+        UserDetails user = new StaffUserPrincipal(securityToken.getStaffUser());
 
         UsernamePasswordAuthenticationToken authentication =
-            new UsernamePasswordAuthenticationToken(
-                userDetails, null, userDetails.getAuthorities());
+            new UsernamePasswordAuthenticationToken(user, null, user.getAuthorities());
 
         authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
         SecurityContextHolder.getContext().setAuthentication(authentication);
 
-        log.debug("Set authentication for user: {}", userDetails.getUsername());
+        log.debug("Set authentication for user: {}", user.getUsername());
       }
     } catch (Exception ex) {
       log.error("Could not set user authentication in security context", ex);

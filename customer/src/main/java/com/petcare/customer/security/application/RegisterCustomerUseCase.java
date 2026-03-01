@@ -52,14 +52,12 @@ public class RegisterCustomerUseCase {
 
     // Auto-login after registration
     String accessToken = jwtService.generateAccessToken(user);
+    String tokenId = UUID.randomUUID().toString();
 
-    String refreshToken = UUID.randomUUID().toString();
-
-    createSecurityTokenUseCase.execute(user, accessToken, refreshToken, deviceTrackingInfo);
+    createSecurityTokenUseCase.execute(tokenId, accessToken, user, deviceTrackingInfo);
 
     return new AuthResponse(
-        accessToken,
-        refreshToken,
+        tokenId,
         "Bearer", // Convert to seconds
         new UserInfo(user.getId(), user.getEmail(), user.getName(), user.getAvatarUrl()));
   }

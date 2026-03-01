@@ -1,6 +1,5 @@
 package com.petcare.customer.security.application;
 
-
 import com.petcare.common.security.domain.DeviceTrackingInfo;
 import com.petcare.common.security.dto.LoginRequest;
 import com.petcare.customer.customer.domain.Customer;
@@ -39,9 +38,11 @@ public class CustomerLoginUseCase {
     SecurityContextHolder.getContext().setAuthentication(authentication);
 
     // Get user
-    Customer  customer =
-            customerRepository.findByEmail(request.username())
-    .orElseThrow(() -> new UsernameNotFoundException("User not found: " + request.username()));
+    Customer customer =
+        customerRepository
+            .findByEmail(request.username())
+            .orElseThrow(
+                () -> new UsernameNotFoundException("User not found: " + request.username()));
 
     // Update last login
     customer.setLastLogin(Instant.now());
@@ -50,14 +51,14 @@ public class CustomerLoginUseCase {
     // Auto-login after registration
     String accessToken = jwtService.generateAccessToken(customer);
 
-    String refreshToken = UUID.randomUUID().toString();
+    String tokenId = UUID.randomUUID().toString();
 
-    createSecurityTokenUseCase.execute(customer, accessToken, refreshToken, deviceTrackingInfo);
+    createSecurityTokenUseCase.execute(tokenId, accessToken, customer, deviceTrackingInfo);
 
     return new AuthResponse(
-        accessToken,
-        refreshToken,
+        tokenId,
         "Bearer", // Convert to seconds
-        new UserInfo(customer.getId(), customer.getEmail(), customer.getName(), customer.getAvatarUrl()));
+        new UserInfo(
+            customer.getId(), customer.getEmail(), customer.getName(), customer.getAvatarUrl()));
   }
 }

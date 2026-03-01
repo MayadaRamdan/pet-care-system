@@ -38,9 +38,9 @@ public class StaffUserLoginUseCase {
       throw new RuntimeException("Invalid password");
 
     String accessToken = jwtService.generateAccessToken(staffUser);
-    String refreshToken = UUID.randomUUID().toString();
+    String tokenId = UUID.randomUUID().toString();
 
-    createSecurityTokenUseCase.execute(staffUser, accessToken, refreshToken, deviceTrackingInfo);
+    createSecurityTokenUseCase.execute(tokenId, accessToken, staffUser, deviceTrackingInfo);
 
     StaffUserRole role = staffUser.getRole();
     StaffUserInfo staffUserInfo =
@@ -52,6 +52,6 @@ public class StaffUserLoginUseCase {
             role.getName(),
             role.getPermissions());
 
-    return new AuthResponse(accessToken, refreshToken, "Bearer", staffUserInfo);
+    return new AuthResponse(tokenId, "Bearer", staffUserInfo);
   }
 }

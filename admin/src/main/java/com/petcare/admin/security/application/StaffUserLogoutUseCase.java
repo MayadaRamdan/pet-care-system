@@ -13,10 +13,8 @@ import org.springframework.transaction.annotation.Transactional;
 public class StaffUserLogoutUseCase {
 
   private final SecurityTokenRepository securityTokenRepository;
-  private final TokenCacheService tokenCacheService;
 
   public void execute(String accessToken) {
     securityTokenRepository.revoke(accessToken);
-    tokenCacheService.evictToken(accessToken);
   }
 }

@@ -1,8 +1,11 @@
 package com.petcare.admin.security.domain;
 
+import static com.petcare.common.common.utils.StringUtils.EMPTY_STRING;
+
 import com.petcare.admin.staffuser.domain.StaffUser;
 import java.util.Collection;
-import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import org.springframework.security.core.GrantedAuthority;
@@ -17,18 +20,23 @@ public class StaffUserPrincipal implements UserDetails {
 
   @Override
   public Collection<? extends GrantedAuthority> getAuthorities() {
-    // All customers have the same basic authority
-    return Collections.singleton(new SimpleGrantedAuthority("CUSTOMER"));
+    Set<SimpleGrantedAuthority> permissions = new HashSet<>();
+    if (user.getRole() != null && user.getRole().getPermissions() != null) {
+      user.getRole()
+          .getPermissions()
+          .forEach(pr -> permissions.add(new SimpleGrantedAuthority(pr.name())));
+    }
+    return permissions;
   }
 
   @Override
   public String getPassword() {
-    return user.getPassword();
+    return EMPTY_STRING;
   }
 
   @Override
   public String getUsername() {
-    return user.getEmail();
+    return user.getUsername();
   }
 
   @Override

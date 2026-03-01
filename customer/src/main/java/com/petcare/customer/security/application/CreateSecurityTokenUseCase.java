@@ -18,34 +18,25 @@ import org.springframework.transaction.annotation.Transactional;
 public class CreateSecurityTokenUseCase {
 
   @Autowired private SecurityTokenRepository tokenRepository;
-  @Autowired private TokenCacheService tokenCacheService;
 
   @Value("${jwt.access-token-expiration}")
   private Long accessTokenExpiration;
 
-  @Value("${jwt.refresh-token-expiration}")
-  private Long refreshTokenExpiration;
-
   public void execute(
-      Customer customer,
+      String tokenId,
       String accessToken,
-      String refreshToken,
+      Customer customer,
       DeviceTrackingInfo deviceTrackingInfo) {
 
     SecurityToken securityToken = new SecurityToken();
+    securityToken.setId(tokenId);
     securityToken.setAccessToken(accessToken);
-    securityToken.setRefreshToken(refreshToken);
     securityToken.setCustomer(customer);
     securityToken.setAccessTokenExpiresAt(
         Instant.now().plus(accessTokenExpiration, ChronoUnit.MINUTES));
-    securityToken.setRefreshTokenExpiresAt(
-        (Instant.now().plus(refreshTokenExpiration, ChronoUnit.DAYS)));
-
     securityToken.setDeviceInfo(deviceTrackingInfo.device());
     securityToken.setIpAddress(deviceTrackingInfo.ip());
 
     tokenRepository.save(securityToken);
-
-    tokenCacheService.cacheToken(accessToken, customer.getId(), accessTokenExpiration * 1000 * 60);
   }
 }
