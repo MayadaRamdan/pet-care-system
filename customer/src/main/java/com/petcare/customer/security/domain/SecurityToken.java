@@ -20,7 +20,7 @@ public class SecurityToken {
 
   @Id private String id; // UUID
 
-  @Column(unique = true, nullable = false)
+  @Column(columnDefinition = "TEXT", unique = true, nullable = false)
   private String accessToken;
 
   @ManyToOne(fetch = FetchType.LAZY)

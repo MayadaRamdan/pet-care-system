@@ -24,7 +24,7 @@ public class SecurityToken {
   @JoinColumn(name = "staff_user_id", nullable = false)
   private StaffUser staffUser;
 
-  @Column(unique = true, nullable = false)
+  @Column(columnDefinition = "TEXT", unique = true, nullable = false)
   private String accessToken;
 
   private Instant accessTokenCreatedAt;

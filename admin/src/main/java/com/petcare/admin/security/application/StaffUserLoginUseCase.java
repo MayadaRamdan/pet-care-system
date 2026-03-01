@@ -7,6 +7,7 @@ import com.petcare.admin.staffuser.domain.StaffUser;
 import com.petcare.admin.staffuser.repository.StaffUserRepository;
 import com.petcare.common.security.domain.DeviceTrackingInfo;
 import com.petcare.common.security.dto.LoginRequest;
+import java.util.Collections;
 import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -50,7 +51,7 @@ public class StaffUserLoginUseCase {
             staffUser.getName(),
             staffUser.getEmail(),
             role.getName(),
-            role.getPermissions());
+            Collections.emptySet());
 
     return new AuthResponse(tokenId, "Bearer", staffUserInfo);
   }
