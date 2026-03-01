@@ -1,6 +1,8 @@
 package com.petcare.admin.catalog.item.domain;
 
 import com.petcare.common.asset.domain.Asset;
+import com.petcare.common.catalog.domain.Stock;
+import com.petcare.common.catalog.domain.StockMode;
 import com.petcare.common.common.domain.Auditable;
 import com.petcare.common.common.embeddable.DateTimePeriod;
 import com.petcare.common.common.embeddable.LocalizableString;
@@ -16,8 +18,11 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import java.math.BigDecimal;
+import java.util.List;
 import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.SQLDelete;
@@ -70,13 +75,35 @@ public class Variation extends Auditable {
   })
   private DateTimePeriod salePricePeriod;
 
-  private Integer stockQty;
-
-  private Integer maxQtyPerOrder;
-
   @ManyToOne
+  @JoinColumn(name = "stock_id", nullable = false)
+  private Stock stock;
+
+  @Enumerated(EnumType.STRING)
+  private StockMode stockMode;
+
+  private Integer unitCapacity;
+
+  private Boolean hideWhenOutOfStock = Boolean.FALSE;
+
+  private Integer maxQtyPerCart;
+
+  @OneToOne
   @JoinColumn(name = "thumbnail_id")
   private Asset thumbnail;
 
   private String thumbnailUrl;
+
+  @OneToMany
+  @JoinColumn(name = "variation_id")
+  private List<VariationAsset> assets;
+
+  public int getUnitCapacity() {
+    if (this.unitCapacity == null || this.unitCapacity < 1) return 1;
+    return this.unitCapacity;
+  }
+
+  public Integer getStockQty() {
+    return stock.getQuantity() / getUnitCapacity();
+  }
 }

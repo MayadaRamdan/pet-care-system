@@ -2,6 +2,7 @@ package com.petcare.admin.catalog.category.repository;
 
 import com.petcare.admin.catalog.category.domain.Category;
 import com.petcare.admin.catalog.category.domain.CategoryListing;
+import com.petcare.admin.catalog.category.domain.PathUpdateCategoryRow;
 import com.petcare.admin.catalog.category.dto.CategoryListNode;
 import com.petcare.common.asset.domain.Asset;
 import com.petcare.common.common.dto.IdName;
@@ -43,4 +44,15 @@ public interface CategoryRepository extends JpaRepository<Category, Long> {
           from Category c where c.id in :ids
           """)
   List<IdName> listCategoriesByIdIn(Set<Long> ids);
+
+  @Query(value = "select distinct c from Category c where c.id in :categoriesIds ")
+  Set<Category> getByIds(Set<Long> categoriesIds);
+
+  @Query(
+      """
+              SELECT new com.petcare.admin.catalog.category.domain.PathUpdateCategoryRow(
+              c.id, c.name.english, c.name.arabic, c.parent.id)
+              FROM Category c
+              """)
+  List<PathUpdateCategoryRow> findCategoriesRows();
 }

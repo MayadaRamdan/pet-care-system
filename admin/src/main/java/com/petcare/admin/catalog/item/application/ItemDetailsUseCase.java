@@ -1,12 +1,13 @@
 package com.petcare.admin.catalog.item.application;
 
 import com.petcare.admin.catalog.category.repository.CategoryRepository;
-import com.petcare.admin.catalog.item.domain.CategoryProduct;
+import com.petcare.admin.catalog.item.domain.CategoryItem;
 import com.petcare.admin.catalog.item.domain.Item;
 import com.petcare.admin.catalog.item.domain.Variation;
 import com.petcare.admin.catalog.item.dto.ItemDetailsDto;
 import com.petcare.admin.catalog.item.dto.VariationDetailsDto;
 import com.petcare.admin.catalog.item.repository.ItemRepository;
+import com.petcare.common.asset.dto.AssetDto;
 import com.petcare.common.asset.mapper.AssetMapper;
 import com.petcare.common.common.dto.IdName;
 import com.petcare.common.common.mapper.IdNameMapper;
@@ -39,20 +40,33 @@ public class ItemDetailsUseCase {
             ? List.of()
             : item.getVariations().stream().map(this::toVariationDetailsDto).toList();
 
+    List<AssetDto> assetDtos = null;
+    if (item.getAssets() != null) {
+      assetDtos =
+          item.getAssets().stream()
+              .map(ia -> assetMapper.toDto(ia.getAsset()))
+              .collect(Collectors.toList());
+    }
+
     return new ItemDetailsDto(
         item.getId(),
         item.getName(),
         item.getDescription(),
         item.getStatus(),
-        IdNameMapper.toIdName(item.getCategory().getId(), item.getCategory().getName()),
         IdNameMapper.toIdName(item.getMerchant().getId(), item.getMerchant().getName()),
-        variations,
-        assetMapper.toDto(item.getThumbnail()),
-        getSecondaryCategories(item));
+        IdNameMapper.toIdName(item.getCategory().getId(), item.getCategory().getName()),
+        getSecondaryCategories(item),
+        item.getMaxQtyPerCart(),
+        item.getStockMode(),
+        item.getHideWhenOutOfStock(),
+        item.getStockAvailable(),
+        (item.getThumbnail() == null) ? null : assetMapper.toDto(item.getThumbnail()),
+        assetDtos,
+        variations);
   }
 
   private List<IdName> getSecondaryCategories(Item item) {
-    List<CategoryProduct> categories = item.getCategories();
+    List<CategoryItem> categories = item.getCategories();
     Long mainCategoryId = item.getCategory().getId();
 
     if (categories == null || categories.size() < 2) {
@@ -61,7 +75,7 @@ public class ItemDetailsUseCase {
 
     Set<Long> secondaryCategoriesIds =
         categories.stream()
-            .map(CategoryProduct::getCategoryId)
+            .map(CategoryItem::getCategoryId)
             .filter(id -> !id.equals(mainCategoryId))
             .collect(Collectors.toSet());
     if (secondaryCategoriesIds.isEmpty()) {
@@ -71,6 +85,15 @@ public class ItemDetailsUseCase {
   }
 
   private VariationDetailsDto toVariationDetailsDto(Variation v) {
+    List<AssetDto> assetDtos = null;
+
+    if (v.getAssets() != null) {
+      assetDtos =
+          v.getAssets().stream()
+              .map(va -> assetMapper.toDto(va.getAsset()))
+              .collect(Collectors.toList());
+    }
+
     return new VariationDetailsDto(
         v.getId(),
         v.getName(),
@@ -80,8 +103,12 @@ public class ItemDetailsUseCase {
         v.getPrice(),
         v.getSalePrice(),
         v.getSalePricePeriod(),
+        v.getStockMode(),
+        v.getUnitCapacity(),
+        v.getHideWhenOutOfStock(),
         v.getStockQty(),
-        v.getMaxQtyPerOrder(),
-        assetMapper.toDto(v.getThumbnail()));
+        v.getMaxQtyPerCart(),
+        assetMapper.toDto(v.getThumbnail()),
+        assetDtos);
   }
 }

@@ -2,6 +2,7 @@ package com.petcare.admin.catalog.category.domain;
 
 import com.petcare.common.asset.domain.Asset;
 import com.petcare.common.common.domain.Auditable;
+import com.petcare.common.common.domain.Constants;
 import com.petcare.common.common.embeddable.LocalizableString;
 import jakarta.persistence.AttributeOverride;
 import jakarta.persistence.AttributeOverrides;
@@ -65,15 +66,21 @@ public class Category extends Auditable {
 
   public void setName(LocalizableString name) {
     this.name = name;
+    refreshPath();
+  }
 
-    if (this.parent == null) {
-      this.path = name;
+  public void refreshPath() {
+    if (parent == null) {
+      path = name;
       return;
     }
 
-    this.path =
-        LocalizableString.of(
-            parent.path.getEnglish() + ">" + this.name.getEnglish(),
-            parent.path.getArabic() + ">" + this.name.getArabic());
+    String englishPath =
+        parent.getPath().getEnglish() + Constants.CATEGORY_PATH_SEPARATOR + name.getEnglish();
+
+    String arabicPath =
+        parent.getPath().getArabic() + Constants.CATEGORY_PATH_SEPARATOR + name.getArabic();
+
+    path = LocalizableString.of(englishPath, arabicPath);
   }
 }

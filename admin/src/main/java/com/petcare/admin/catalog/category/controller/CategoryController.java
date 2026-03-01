@@ -1,9 +1,11 @@
 package com.petcare.admin.catalog.category.controller;
 
+import com.petcare.admin.catalog.category.application.BuildCategoryAncestorDescendantUseCase;
 import com.petcare.admin.catalog.category.application.CategoryDetailsByIdUseCase;
 import com.petcare.admin.catalog.category.application.CreateCategoryUseCase;
 import com.petcare.admin.catalog.category.application.ListAllCategoriesUseCase;
 import com.petcare.admin.catalog.category.application.ListCategoriesByParentIdUseCase;
+import com.petcare.admin.catalog.category.application.UpdateCategoriesPathsUseCase;
 import com.petcare.admin.catalog.category.application.UpdateCategoryThumbnailUseCase;
 import com.petcare.admin.catalog.category.dto.CreateCategoryRequest;
 import com.petcare.common.common.response.ApiResponse;
@@ -13,6 +15,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -29,11 +32,13 @@ public class CategoryController {
   private final ListCategoriesByParentIdUseCase listCategoriesByParentIdUseCase;
   private final UpdateCategoryThumbnailUseCase updateCategoryThumbnailUseCase;
   private final CategoryDetailsByIdUseCase categoryDetailsByIdUseCase;
+  private final UpdateCategoriesPathsUseCase updateCategoriesPathsUseCase;
+  private final BuildCategoryAncestorDescendantUseCase buildAncestorDescendantUseCase;
 
   @PostMapping
-  public ResponseEntity<Void> createCategory(@RequestBody CreateCategoryRequest request) {
+  public ResponseEntity<ApiResponse> createCategory(@RequestBody CreateCategoryRequest request) {
     createCategoryUseCase.execute(request);
-    return ResponseEntity.ok().build();
+    return ResponseEntity.ok(ApiResponse.success());
   }
 
   @GetMapping
@@ -55,11 +60,23 @@ public class CategoryController {
   }
 
   @PostMapping("/{id}/assets")
-  public ResponseEntity<Void> uploadThumbnail(
+  public ResponseEntity<ApiResponse> uploadThumbnail(
       @PathVariable(name = "id") Long categoryId,
       @RequestParam(name = "file", required = false) MultipartFile file)
       throws IOException {
     updateCategoryThumbnailUseCase.execute(categoryId, file);
-    return ResponseEntity.ok().build();
+    return ResponseEntity.ok(ApiResponse.success());
+  }
+
+  @PutMapping("/categories-paths")
+  public ResponseEntity<ApiResponse> updateCategoriesPaths() {
+    updateCategoriesPathsUseCase.execute();
+    return ResponseEntity.ok(ApiResponse.success());
+  }
+
+  @PostMapping("/ancestors-and-descendants")
+  public ResponseEntity<ApiResponse> buildCategoryDescendant() {
+    buildAncestorDescendantUseCase.execute();
+    return ResponseEntity.ok(ApiResponse.success());
   }
 }

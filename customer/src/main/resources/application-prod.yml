@@ -1,0 +1,21 @@
+spring:
+  datasource:
+    hikari:
+      pool-name: PetNeedsProdHikariPool
+      maximum-pool-size: 30
+      minimum-idle: 10
+      connection-timeout: 30000
+      idle-timeout: 600000
+      max-lifetime: 1800000
+      leak-detection-threshold: 20000
+      connection-test-query: SELECT 1
+      auto-commit: true
+      initialization-fail-timeout: 10000
+      register-mbeans: true
+      validation-timeout: 5000
+      allow-pool-suspension: false
+      data-source-properties:
+        cachePrepStmts: true
+        prepStmtCacheSize: 250
+        prepStmtCacheSqlLimit: 2048
+        useServerPrepStmts: true

@@ -1,0 +1,24 @@
+package com.petcare.admin.security.domain;
+
+public enum StaffUserPermission {
+  VIEW_CATEGORY,
+  MANAGE_CATEGORY,
+
+  VIEW_ITEM,
+  MANAGE_ITEM,
+
+  VIEW_STAFF_USER,
+  MANAGE_STAFF_USER,
+
+  VIEW_ROLE,
+  MANAGE_ROLE,
+
+  VIEW_MERCHANT,
+  MANAGE_MERCHANT,
+
+  VIEW_ZONE,
+  MANAGE_ZONE,
+
+  VIEW_ORDER,
+  MANAGE_ORDER
+}

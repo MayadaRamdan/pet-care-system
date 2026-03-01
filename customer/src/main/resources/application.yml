@@ -1,0 +1,62 @@
+server:
+  port: 8084
+  servlet:
+    context-path: /customer
+
+spring:
+  profiles:
+    active: local
+  application:
+    name: customer
+  threads:
+    virtual:
+      enabled: true  #enable virtual threads
+
+  # Database
+  datasource:
+    url: jdbc:mysql://localhost:3306/petneeds?useSSL=false&useUnicode=true&characterEncoding=UTF-8
+    username: root
+    password: root
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    hikari:
+      maximum-pool-size: 20 #database pool configuration
+
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    open-in-view: false
+    properties:
+      hibernate:
+        format_sql: true
+        # dialect: org.hibernate.dialect.MariaDBDialect #it is MariaDBDialect by default
+
+  # OAuth2
+  security:
+    oauth2:
+      client:
+        registration:
+          google:
+            client-id: ${GOOGLE_CLIENT_ID}
+            client-secret: ${GOOGLE_CLIENT_SECRET}
+            scope:
+              - email
+              - profile
+
+# JWT Configuration
+jwt:
+  secret: 87ab465cbb15dae140e01f7e657b9f4fa9f87d70fa4efe1eeccb769fb23c67fd9bbe74207b6bb95c29c9059d2fc3ae3c96e151b5c56009f1e9ab0e6e44485936
+  access-token-expiration: 90000000 # 1500 minutes in ms
+
+# Application
+app:
+  cors:
+    allowed-origins: http://localhost:3000,http://localhost:4200
+
+# Swagger Configuration
+springdoc:
+  swagger-ui:
+    path: /docs # Change swagger UI path
+    enabled: false # Disable swagger in production
+    operationsSorter: method # Sort endpoints

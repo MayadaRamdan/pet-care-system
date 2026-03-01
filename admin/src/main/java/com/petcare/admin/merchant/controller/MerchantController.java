@@ -4,6 +4,7 @@ import com.petcare.admin.merchant.application.CreateMerchantUseCase;
 import com.petcare.admin.merchant.application.ListMerchantsUseCase;
 import com.petcare.admin.merchant.dto.CreateMerchantRequest;
 import com.petcare.admin.merchant.dto.MerchantListingRecord;
+import com.petcare.common.common.response.ApiResponse;
 import java.util.List;
 import lombok.AllArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -22,9 +23,9 @@ public class MerchantController {
   private final ListMerchantsUseCase listMerchantsUseCase;
 
   @PostMapping
-  public ResponseEntity<Void> createMerchant(@RequestBody CreateMerchantRequest request) {
+  public ResponseEntity<ApiResponse> createMerchant(@RequestBody CreateMerchantRequest request) {
     createMerchantUseCase.execute(request);
-    return ResponseEntity.ok().build();
+    return ResponseEntity.ok(ApiResponse.success());
   }
 
   @GetMapping

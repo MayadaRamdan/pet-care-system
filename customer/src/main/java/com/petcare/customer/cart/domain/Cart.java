@@ -27,8 +27,5 @@ public class Cart {
 
   @ManyToOne private Customer customer;
 
-  @OneToMany(mappedBy = "cart")
-  private List<CartItem> items;
-
   private BigDecimal total;
 }
