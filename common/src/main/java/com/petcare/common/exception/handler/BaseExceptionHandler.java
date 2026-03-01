@@ -2,9 +2,12 @@ package com.petcare.common.exception.handler;
 
 import com.petcare.common.exception.domain.BusinessException;
 import com.petcare.common.exception.domain.ResourceNotFoundException;
+import com.petcare.common.exception.domain.UnauthorizedException;
 import com.petcare.common.exception.domain.ValidationException;
 import com.petcare.common.exception.dto.ErrorResponse;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import org.springframework.context.MessageSource;
 import org.springframework.context.i18n.LocaleContextHolder;
@@ -23,11 +26,11 @@ public abstract class BaseExceptionHandler {
   }
 
   protected String getMessage(String key, Object[] args) {
-    return messageSource.getMessage(
-        key,
-        args,
-        key, // default message if key not found
-        LocaleContextHolder.getLocale());
+    return messageSource.getMessage(key, args, key, LocaleContextHolder.getLocale());
+  }
+
+  protected String getMessage(String key) {
+    return messageSource.getMessage(key, null, key, LocaleContextHolder.getLocale());
   }
 
   @ExceptionHandler(ResourceNotFoundException.class)
@@ -37,7 +40,7 @@ public abstract class BaseExceptionHandler {
     String message = getMessage(ex.getMessageKey(), ex.getArgs());
 
     ErrorResponse error =
-        new ErrorResponse(HttpStatus.NOT_FOUND.value(), message, request.getDescription(false));
+        ErrorResponse.of(HttpStatus.NOT_FOUND, message, List.of(request.getDescription(false)));
     return new ResponseEntity<>(error, HttpStatus.NOT_FOUND);
   }
 
@@ -48,23 +51,9 @@ public abstract class BaseExceptionHandler {
     String message = getMessage(ex.getMessageKey(), ex.getArgs());
 
     ErrorResponse error =
-        new ErrorResponse(HttpStatus.BAD_REQUEST.value(), message, request.getDescription(false));
+        ErrorResponse.of(HttpStatus.BAD_REQUEST, message, List.of(request.getDescription(false)));
     return new ResponseEntity<>(error, HttpStatus.BAD_REQUEST);
   }
-
-  //  @ExceptionHandler(UnauthorizedException.class)
-  //  public ResponseEntity<ErrorResponse> handleUnauthorized(
-  //          UnauthorizedException ex, WebRequest request) {
-  //
-  //    String message = getMessage(ex.getMessageKey(), ex.getArgs());
-  //
-  //    ErrorResponse error = new ErrorResponse(
-  //            HttpStatus.UNAUTHORIZED.value(),
-  //            message,
-  //            request.getDescription(false)
-  //    );
-  //    return new ResponseEntity<>(error, HttpStatus.UNAUTHORIZED);
-  //  }
 
   @ExceptionHandler(BusinessException.class)
   public ResponseEntity<ErrorResponse> handleBusinessException(
@@ -73,13 +62,12 @@ public abstract class BaseExceptionHandler {
     String message = getMessage(ex.getMessageKey(), ex.getArgs());
 
     ErrorResponse error =
-        new ErrorResponse(HttpStatus.BAD_REQUEST.value(), message, request.getDescription(false));
+        ErrorResponse.of(HttpStatus.BAD_REQUEST, message, List.of(request.getDescription(false)));
     return new ResponseEntity<>(error, HttpStatus.BAD_REQUEST);
   }
 
   @ExceptionHandler(MethodArgumentNotValidException.class)
-  public ResponseEntity<Map<String, String>> handleValidationErrors(
-      MethodArgumentNotValidException ex) {
+  public ResponseEntity<ErrorResponse> handleValidationErrors(MethodArgumentNotValidException ex) {
 
     Map<String, String> errors = new HashMap<>();
     ex.getBindingResult()
@@ -90,7 +78,14 @@ public abstract class BaseExceptionHandler {
               errors.put(error.getField(), errorMessage);
             });
 
-    return new ResponseEntity<>(errors, HttpStatus.BAD_REQUEST);
+    return new ResponseEntity<>(ErrorResponse.validation(errors), HttpStatus.BAD_REQUEST);
+  }
+
+  @ExceptionHandler(IllegalStateException.class)
+  public ResponseEntity<ErrorResponse> handleIllegalStateException(IllegalStateException ex) {
+    return new ResponseEntity<>(
+        ErrorResponse.of(HttpStatus.BAD_REQUEST, ex.getMessage(), Collections.emptyList()),
+        HttpStatus.BAD_REQUEST);
   }
 
   @ExceptionHandler(Exception.class)
@@ -99,13 +94,24 @@ public abstract class BaseExceptionHandler {
     String message = getMessage("petcare.error.internal.server", null);
 
     ErrorResponse error =
-        new ErrorResponse(
-            HttpStatus.INTERNAL_SERVER_ERROR.value(), message, request.getDescription(false));
+        ErrorResponse.of(
+            HttpStatus.INTERNAL_SERVER_ERROR, message, List.of(request.getDescription(false)));
 
     // Log the actual exception for debugging
     logException(ex);
 
     return new ResponseEntity<>(error, HttpStatus.INTERNAL_SERVER_ERROR);
+  }
+
+  @ExceptionHandler(UnauthorizedException.class)
+  public ResponseEntity<ErrorResponse> handleUnauthorized(
+      UnauthorizedException ex, WebRequest request) {
+
+    String message = getMessage(ex.getMessageKey());
+
+    ErrorResponse error =
+        ErrorResponse.of(HttpStatus.UNAUTHORIZED, message, List.of(request.getDescription(false)));
+    return new ResponseEntity<>(error, HttpStatus.UNAUTHORIZED);
   }
 
   // Hook method for services to override logging behavior

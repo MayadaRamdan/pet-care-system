@@ -5,7 +5,6 @@ import lombok.Setter;
 
 @Getter
 @Setter
-// Base exception with message key support
 public abstract class BaseException extends RuntimeException {
   private final String messageKey;
   private final Object[] args;

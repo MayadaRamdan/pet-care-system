@@ -64,4 +64,14 @@ public class ItemController {
     syncItemVariationsUseCase.execute(itemId, request.variations());
     return ResponseEntity.ok(ApiResponse.success());
   }
+
+  @PutMapping("/{id}/activate")
+  public ResponseEntity<ApiResponse> activatedItem(@PathVariable("id") Long itemId) {
+    return ResponseEntity.ok(ApiResponse.success());
+  }
+
+  @PutMapping("/{id}/deactivate")
+  public ResponseEntity<ApiResponse> deactivatedItem(@PathVariable("id") Long itemId) {
+    return ResponseEntity.ok(ApiResponse.success());
+  }
 }
