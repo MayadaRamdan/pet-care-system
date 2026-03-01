@@ -2,7 +2,6 @@ package com.petcare.admin.security.application;
 
 import com.petcare.admin.staffuser.domain.StaffUser;
 import com.petcare.common.security.domain.DeviceTrackingInfo;
-import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
 import jakarta.annotation.PostConstruct;
@@ -50,7 +49,7 @@ public class GenerateAccessTokenUseCase {
             .subject(user.getId().toString())
             .claims(claims)
             .issuedAt(new Date())
-            .expiration(new Date(System.currentTimeMillis() + accessTokenExpiration))
+            .expiration(new Date(System.currentTimeMillis() + (60 * 1000* accessTokenExpiration)))
             .signWith(key)
             .compact();
 
@@ -58,15 +57,5 @@ public class GenerateAccessTokenUseCase {
     createSecurityTokenUseCase.execute(tokenId, accessToken, user, deviceTrackingInfo);
 
     return tokenId;
-  }
-
-  public boolean validateToken(String token) {
-    try {
-      Jwts.parser().verifyWith(key).build().parseSignedClaims(token);
-      return true;
-    } catch (JwtException | IllegalArgumentException e) {
-      log.error("JWT validation error: {}", e.getMessage());
-      return false;
-    }
   }
 }

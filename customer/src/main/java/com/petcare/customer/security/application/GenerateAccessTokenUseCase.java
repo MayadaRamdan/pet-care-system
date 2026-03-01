@@ -20,39 +20,38 @@ import org.springframework.stereotype.Service;
 @Service
 public class GenerateAccessTokenUseCase {
 
-    @Autowired
-    private CreateSecurityTokenUseCase createSecurityTokenUseCase;
+  @Autowired private CreateSecurityTokenUseCase createSecurityTokenUseCase;
 
-    @Value("${jwt.secret}")
-    private String secret;
+  @Value("${jwt.secret}")
+  private String secret;
 
-    @Value("${jwt.access-token-expiration}")
-    private Long accessTokenExpiration;
+  @Value("${jwt.access-token-expiration}")
+  private Long accessTokenExpiration;
 
-    private SecretKey key;
+  private SecretKey key;
 
-    @PostConstruct
-    public void init() {
-        this.key = Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8));
-    }
+  @PostConstruct
+  public void init() {
+    this.key = Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8));
+  }
 
-    public String execute(Customer customer, DeviceTrackingInfo deviceTrackingInfo) {
-        Map<String, Object> claims = new HashMap<>();
-        claims.put("userId", customer.getId());
-        claims.put("email", customer.getEmail());
+  public String execute(Customer customer, DeviceTrackingInfo deviceTrackingInfo) {
+    Map<String, Object> claims = new HashMap<>();
+    claims.put("userId", customer.getId());
+    claims.put("email", customer.getEmail());
 
-        String accessToken =
-                Jwts.builder()
-                        .subject(customer.getEmail())
-                        .claims(claims)
-                        .issuedAt(new Date())
-                        .expiration(new Date(System.currentTimeMillis() + accessTokenExpiration))
-                        .signWith(key)
-                        .compact();
+    String accessToken =
+        Jwts.builder()
+            .subject(customer.getEmail())
+            .claims(claims)
+            .issuedAt(new Date())
+            .expiration(new Date(System.currentTimeMillis() + (60 * 1000 * accessTokenExpiration)))
+            .signWith(key)
+            .compact();
 
-        String tokenId = UUID.randomUUID().toString();
-        createSecurityTokenUseCase.execute(tokenId, accessToken, customer, deviceTrackingInfo);
+    String tokenId = UUID.randomUUID().toString();
+    createSecurityTokenUseCase.execute(tokenId, accessToken, customer, deviceTrackingInfo);
 
-        return tokenId;
-    }
+    return tokenId;
+  }
 }
