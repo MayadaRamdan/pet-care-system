@@ -2,8 +2,17 @@ package com.petcare.customer.utils;
 
 import com.petcare.common.security.domain.DeviceTrackingInfo;
 import jakarta.servlet.http.HttpServletRequest;
+import org.springframework.util.StringUtils;
 
 public class HttpServletRequestUtils {
+
+  public static String getJwtFromRequest(HttpServletRequest request) {
+    String bearerToken = request.getHeader("Authorization");
+    if (StringUtils.hasText(bearerToken) && bearerToken.startsWith("Bearer ")) {
+      return bearerToken.substring(7);
+    }
+    return null;
+  }
 
   private static String getDeviceInfo(HttpServletRequest request) {
     String userAgent = request.getHeader("User-Agent");

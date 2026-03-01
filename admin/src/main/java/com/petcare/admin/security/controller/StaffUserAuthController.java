@@ -1,6 +1,6 @@
 package com.petcare.admin.security.controller;
 
-import com.petcare.admin.security.application.JwtService;
+import com.petcare.admin.security.application.GenerateAccessTokenUseCase;
 import com.petcare.admin.security.application.StaffUserLoginUseCase;
 import com.petcare.admin.security.application.StaffUserLogoutAllDevicesUseCase;
 import com.petcare.admin.security.application.StaffUserLogoutUseCase;
@@ -27,7 +27,7 @@ public class StaffUserAuthController {
   private final StaffUserLoginUseCase staffUserLoginUseCase;
   private final StaffUserLogoutUseCase staffUserLogoutUseCase;
   private final StaffUserLogoutAllDevicesUseCase staffUserLogoutAllDevicesUseCase;
-  private final JwtService jwtService;
+  private final GenerateAccessTokenUseCase generateAccessTokenUseCase;
 
   @PostMapping("/login")
   public ResponseEntity<ApiResponse> login(
@@ -42,7 +42,7 @@ public class StaffUserAuthController {
   @PostMapping("/logout")
   public ResponseEntity<ApiResponse> logout(HttpServletRequest httpRequest) {
     log.info("Logout endpoint hit!");
-    staffUserLogoutUseCase.execute(jwtService.getJwtFromRequest(httpRequest));
+    staffUserLogoutUseCase.execute(HttpServletRequestUtils.getJwtFromRequest(httpRequest));
     return ResponseEntity.ok(ApiResponse.success());
   }
 

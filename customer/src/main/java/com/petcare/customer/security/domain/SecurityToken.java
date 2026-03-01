@@ -15,7 +15,7 @@ import lombok.Setter;
 @Getter
 @Setter
 @Entity
-@Table(name = "customer_security_tokens")
+@Table(name = "customer_security_token")
 public class SecurityToken {
 
   @Id private String id; // UUID

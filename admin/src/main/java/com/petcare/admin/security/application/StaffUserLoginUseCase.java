@@ -8,7 +8,6 @@ import com.petcare.admin.staffuser.repository.StaffUserRepository;
 import com.petcare.common.security.domain.DeviceTrackingInfo;
 import com.petcare.common.security.dto.LoginRequest;
 import java.util.Collections;
-import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -23,12 +22,10 @@ import org.springframework.transaction.annotation.Transactional;
 public class StaffUserLoginUseCase {
 
   private final StaffUserRepository userRepository;
-  private final JwtService jwtService;
+  private final GenerateAccessTokenUseCase generateAccessTokenUseCase;
   private final PasswordEncoder encoder;
-  private final CreateSecurityTokenUseCase createSecurityTokenUseCase;
 
   public AuthResponse execute(LoginRequest request, DeviceTrackingInfo deviceTrackingInfo) {
-
     StaffUser staffUser =
         userRepository
             .findByUsername(request.username())
@@ -38,10 +35,7 @@ public class StaffUserLoginUseCase {
     if (!encoder.matches(request.password(), staffUser.getPassword()))
       throw new RuntimeException("Invalid password");
 
-    String accessToken = jwtService.generateAccessToken(staffUser);
-    String tokenId = UUID.randomUUID().toString();
-
-    createSecurityTokenUseCase.execute(tokenId, accessToken, staffUser, deviceTrackingInfo);
+    String accessToken = generateAccessTokenUseCase.execute(staffUser, deviceTrackingInfo);
 
     StaffUserRole role = staffUser.getRole();
     StaffUserInfo staffUserInfo =
@@ -53,6 +47,6 @@ public class StaffUserLoginUseCase {
             role.getName(),
             Collections.emptySet());
 
-    return new AuthResponse(tokenId, "Bearer", staffUserInfo);
+    return new AuthResponse(accessToken, "Bearer", staffUserInfo);
   }
 }

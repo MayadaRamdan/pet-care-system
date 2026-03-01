@@ -1,10 +1,10 @@
 package com.petcare.admin.security.filter;
 
-
-import com.petcare.admin.security.application.JwtService;
+import com.petcare.admin.security.application.AccessTokenValidator;
 import com.petcare.admin.security.domain.SecurityToken;
 import com.petcare.admin.security.domain.StaffUserPrincipal;
 import com.petcare.admin.security.repository.SecurityTokenRepository;
+import com.petcare.admin.utils.HttpServletRequestUtils;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -26,7 +26,7 @@ import org.springframework.web.filter.OncePerRequestFilter;
 @Slf4j
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
-  private final JwtService jwtService;
+  private final AccessTokenValidator accessTokenValidator;
   private final SecurityTokenRepository tokenRepository;
 
   @Override
@@ -37,12 +37,12 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
       throws ServletException, IOException {
 
     try {
-      String tokenId = jwtService.getJwtFromRequest(request);
+      String tokenId = HttpServletRequestUtils.getJwtFromRequest(request);
       SecurityToken securityToken = tokenRepository.fetchFullAccessToken(tokenId).orElseThrow();
 
       String jwt = securityToken.getAccessToken();
 
-      if (StringUtils.hasText(jwt) && jwtService.validateToken(jwt)) {
+      if (StringUtils.hasText(jwt) && accessTokenValidator.execute(jwt)) {
 
         UserDetails user = new StaffUserPrincipal(securityToken.getStaffUser());
 

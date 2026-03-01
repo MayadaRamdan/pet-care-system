@@ -7,7 +7,6 @@ import com.petcare.customer.customer.repository.CustomerRepository;
 import com.petcare.customer.security.dto.AuthResponse;
 import com.petcare.customer.security.dto.CustomerRegisterRequest;
 import com.petcare.customer.security.dto.UserInfo;
-import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -22,8 +21,7 @@ public class RegisterCustomerUseCase {
 
   private final CustomerRepository userRepository;
   private final PasswordEncoder passwordEncoder;
-  private final JwtService jwtService;
-  private final CreateSecurityTokenUseCase createSecurityTokenUseCase;
+  private final GenerateAccessTokenUseCase generateAccessTokenUseCase;
 
   public AuthResponse execute(
       CustomerRegisterRequest request, DeviceTrackingInfo deviceTrackingInfo) {
@@ -50,14 +48,10 @@ public class RegisterCustomerUseCase {
 
     log.info("New customer registered: {}", user.getEmail());
 
-    // Auto-login after registration
-    String accessToken = jwtService.generateAccessToken(user);
-    String tokenId = UUID.randomUUID().toString();
-
-    createSecurityTokenUseCase.execute(tokenId, accessToken, user, deviceTrackingInfo);
+    String accessToken = generateAccessTokenUseCase.execute(user, deviceTrackingInfo);
 
     return new AuthResponse(
-        tokenId,
+            accessToken,
         "Bearer", // Convert to seconds
         new UserInfo(user.getId(), user.getEmail(), user.getName(), user.getAvatarUrl()));
   }

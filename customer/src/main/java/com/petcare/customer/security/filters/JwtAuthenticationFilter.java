@@ -1,10 +1,10 @@
 package com.petcare.customer.security.filters;
 
-import com.petcare.customer.security.application.CustomerDetailsService;
-import com.petcare.customer.security.application.JwtService;
+import com.petcare.customer.security.application.AccessTokenValidator;
 import com.petcare.customer.security.domain.CustomerPrincipal;
 import com.petcare.customer.security.domain.SecurityToken;
 import com.petcare.customer.security.repository.SecurityTokenRepository;
+import com.petcare.customer.utils.HttpServletRequestUtils;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -26,7 +26,7 @@ import org.springframework.web.filter.OncePerRequestFilter;
 @Slf4j
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
-  private final JwtService jwtService;
+  private final AccessTokenValidator accessTokenValidator;
   private final SecurityTokenRepository tokenRepository;
 
   @Override
@@ -37,18 +37,15 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
       throws ServletException, IOException {
 
     try {
-      String tokenId = getJwtFromRequest(request);
-
+      String tokenId = HttpServletRequestUtils.getJwtFromRequest(request);
       SecurityToken securityToken = tokenRepository.fetchFullAccessToken(tokenId).orElseThrow();
-
       String jwt = securityToken.getAccessToken();
 
-      if (StringUtils.hasText(jwt) && jwtService.validateToken(jwt)) {
+      if (StringUtils.hasText(jwt) && accessTokenValidator.execute(jwt)) {
         UserDetails user = new CustomerPrincipal(securityToken.getCustomer());
 
         UsernamePasswordAuthenticationToken authentication =
-            new UsernamePasswordAuthenticationToken(
-                    user, null, user.getAuthorities());
+            new UsernamePasswordAuthenticationToken(user, null, user.getAuthorities());
 
         authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
         SecurityContextHolder.getContext().setAuthentication(authentication);
@@ -60,13 +57,5 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     }
 
     filterChain.doFilter(request, response);
-  }
-
-  private String getJwtFromRequest(HttpServletRequest request) {
-    String bearerToken = request.getHeader("Authorization");
-    if (StringUtils.hasText(bearerToken) && bearerToken.startsWith("Bearer ")) {
-      return bearerToken.substring(7);
-    }
-    return null;
   }
 }
