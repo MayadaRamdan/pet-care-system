@@ -17,6 +17,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.jspecify.annotations.NonNull;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -25,14 +26,17 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 import org.springframework.web.filter.OncePerRequestFilter;
 
+@Slf4j
 @Component
 @RequiredArgsConstructor
-@Slf4j
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
   private final AccessTokenValidator accessTokenValidator;
   private final SecurityTokenRepository tokenRepository;
   private final ObjectMapper objectMapper;
+
+  private static final WebAuthenticationDetailsSource AUTH_DETAILS_SOURCE =
+      new WebAuthenticationDetailsSource();
 
   @Override
   protected void doFilterInternal(
@@ -44,7 +48,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     try {
       String tokenId = HttpServletRequestUtils.getJwtFromRequest(request);
 
-      if (tokenId == null) {
+      if (!StringUtils.hasText(tokenId)) {
         prepareResponse(response, "Missed access token");
         return;
       }
@@ -69,13 +73,13 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
       UsernamePasswordAuthenticationToken authentication =
           new UsernamePasswordAuthenticationToken(user, null, user.getAuthorities());
 
-      authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+      authentication.setDetails(AUTH_DETAILS_SOURCE.buildDetails(request));
       SecurityContextHolder.getContext().setAuthentication(authentication);
 
       log.debug("Set authentication for user: {}", user.getUsername());
       filterChain.doFilter(request, response);
 
-    } catch (Exception ex) {
+    } catch (RuntimeException ex) {
       log.error("Could not set user authentication in security context", ex);
       prepareResponse(response, "Invalid token");
     }
@@ -85,7 +89,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     SecurityContextHolder.clearContext();
 
     response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-    response.setContentType("application/json");
+    response.setContentType(MediaType.APPLICATION_JSON_VALUE);
 
     response
         .getWriter()
