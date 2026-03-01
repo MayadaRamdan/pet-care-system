@@ -1,5 +1,7 @@
 package com.petcare.customer.security.filters;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.petcare.common.exception.dto.ErrorResponse;
 import com.petcare.customer.security.application.jwt.AccessTokenValidator;
 import com.petcare.customer.security.domain.CustomerPrincipal;
 import com.petcare.customer.security.domain.SecurityToken;
@@ -10,9 +12,11 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.jspecify.annotations.NonNull;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -28,6 +32,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
   private final AccessTokenValidator accessTokenValidator;
   private final SecurityTokenRepository tokenRepository;
+  private final ObjectMapper objectMapper;
 
   @Override
   protected void doFilterInternal(
@@ -38,24 +43,53 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     try {
       String tokenId = HttpServletRequestUtils.getJwtFromRequest(request);
-      SecurityToken securityToken = tokenRepository.fetchFullAccessToken(tokenId).orElseThrow();
+
+      if (tokenId == null) {
+        prepareResponse(response, "Missed access token");
+        return;
+      }
+
+      Optional<SecurityToken> securityTokenOpt = tokenRepository.fetchFullAccessToken(tokenId);
+
+      if (securityTokenOpt.isEmpty()) {
+        prepareResponse(response, "Invalid token");
+        return;
+      }
+
+      SecurityToken securityToken = securityTokenOpt.get();
       String jwt = securityToken.getAccessToken();
 
-      if (StringUtils.hasText(jwt) && accessTokenValidator.execute(jwt)) {
-        UserDetails user = new CustomerPrincipal(securityToken.getCustomer());
-
-        UsernamePasswordAuthenticationToken authentication =
-            new UsernamePasswordAuthenticationToken(user, null, user.getAuthorities());
-
-        authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-        SecurityContextHolder.getContext().setAuthentication(authentication);
-
-        log.debug("Set authentication for user: {}", user.getUsername());
+      if (!StringUtils.hasText(jwt) || !accessTokenValidator.execute(jwt)) {
+        prepareResponse(response, "Invalid token");
+        return;
       }
+
+      UserDetails user = new CustomerPrincipal(securityToken.getCustomer());
+
+      UsernamePasswordAuthenticationToken authentication =
+          new UsernamePasswordAuthenticationToken(user, null, user.getAuthorities());
+
+      authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+      SecurityContextHolder.getContext().setAuthentication(authentication);
+
+      log.debug("Set authentication for user: {}", user.getUsername());
+      filterChain.doFilter(request, response);
+
     } catch (Exception ex) {
       log.error("Could not set user authentication in security context", ex);
+      prepareResponse(response, "Invalid token");
     }
+  }
 
-    filterChain.doFilter(request, response);
+  private void prepareResponse(HttpServletResponse response, String errorMsg) throws IOException {
+    SecurityContextHolder.clearContext();
+
+    response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+    response.setContentType("application/json");
+
+    response
+        .getWriter()
+        .write(
+            objectMapper.writeValueAsString(ErrorResponse.of(HttpStatus.UNAUTHORIZED, errorMsg)));
   }
 }

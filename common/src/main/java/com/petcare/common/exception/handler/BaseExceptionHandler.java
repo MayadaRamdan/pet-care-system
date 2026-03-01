@@ -108,6 +108,9 @@ public abstract class BaseExceptionHandler {
       UnauthorizedException ex, WebRequest request) {
 
     String message = getMessage(ex.getMessageKey());
+    if (message == null) {
+      message = "Unauthorized";
+    }
 
     ErrorResponse error =
         ErrorResponse.of(HttpStatus.UNAUTHORIZED, message, List.of(request.getDescription(false)));
