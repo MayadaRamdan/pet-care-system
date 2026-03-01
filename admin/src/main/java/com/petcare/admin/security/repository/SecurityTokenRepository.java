@@ -22,6 +22,6 @@ public interface SecurityTokenRepository extends JpaRepository<SecurityToken, St
       "SELECT t FROM SecurityToken t"
           + " left join fetch t.staffUser au"
           + " left join fetch au.role"
-          + " WHERE t.id = :token and t.revoked = false")
-  Optional<SecurityToken> fetchFullAccessToken(String id);
+          + " WHERE t.id = :tokenId and t.revoked = false")
+  Optional<SecurityToken> fetchFullAccessToken(String tokenId);
 }
